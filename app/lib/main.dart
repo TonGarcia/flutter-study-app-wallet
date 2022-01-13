@@ -75,65 +75,90 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text(widget.title)
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const SizedBox(
-              width: 150,
-              child: Image(
-                image: AssetImage('assets/ethereum.png'),
+      body: SingleChildScrollView(
+        reverse: true,
+        child: Center(
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          child: Column(
+            // Column is also a layout widget. It takes a list of children and
+            // arranges them vertically. By default, it sizes itself to fit its
+            // children horizontally, and tries to be as tall as its parent.
+            //
+            // Invoke "debug painting" (press "p" in the console, choose the
+            // "Toggle Debug Paint" action from the Flutter Inspector in Android
+            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+            // to see the wireframe for each widget.
+            //
+            // Column has various properties to control how it sizes itself and
+            // how it positions its children. Here we use mainAxisAlignment to
+            // center the children vertically; the main axis here is the vertical
+            // axis because Columns are vertical (the cross axis would be
+            // horizontal).
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const SizedBox(
+                width: 150,
+                child: Image(
+                  image: AssetImage('assets/ethereum.png'),
+                ),
               ),
-            ),
-            Text(
-              '$_amountEther ETH',
-              style: Theme.of(context).textTheme.headline2,
-            ),
-            Text(
-              'network: rinkeby',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            Row(
-              children: [
-                 Container(
-                   width: 300,
-                   padding: const EdgeInsets.only(left: 40.0),
-                   child: Text(_walletAddress,
-                       style: const TextStyle(fontSize: 25.0),
-                       textAlign: TextAlign.center),
-                 ),
-                const SizedBox(width: 20.0),
-                IconButton(
+              Text(
+                '$_amountEther ETH',
+                style: Theme.of(context).textTheme.headline2,
+              ),
+              Text(
+                'network: rinkeby',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 300,
+                    padding: const EdgeInsets.only(left: 40.0),
+                    child: Text(_walletAddress,
+                        style: const TextStyle(fontSize: 25.0),
+                        textAlign: TextAlign.center),
+                  ),
+                  const SizedBox(width: 20.0),
+                  IconButton(
                     onPressed: (){
                       Clipboard.setData(ClipboardData(text: _walletAddress));
                     },
                     icon: Icon(Icons.content_copy),
                     color: Colors.blue,
-                )
-              ],
-            )
-          ],
+                  )
+                ],
+              ),
+              Container(
+                  padding: const EdgeInsets.all(20.0),
+                  child: const TextField(
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      hintText: 'Set public address to send funds',
+                    ),
+                    keyboardType: TextInputType.multiline,
+                  )
+              ),
+              Container(
+                  padding: const EdgeInsets.all(20.0),
+                  child: const TextField(
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      hintText: 'Amount to be send',
+                    ),
+                  )
+              ),
+              Padding(
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom))
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
