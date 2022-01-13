@@ -39,7 +39,7 @@ New Sample Flutter Study App
 # Running Mobile - Android
 
 1. Emulators (show): ``` $ flutter emulators ```
-1. Emulators (run): ``` $ flutter emulators --launch Pixel_3a_API_30 (emulator_id) ``` 
+1. Emulators (run): ``` $ flutter emulators --launch Pixel_4_API_30 (emulator_id) ```
 1. Emulators (availables): ``` $ flutter devices ```
 1. Running on openned emulator: ``` $ flutter run ```
 1. Running on specific emulator: ``` $ flutter run -d emulator-5554 (emulator id) ```
@@ -50,4 +50,39 @@ New Sample Flutter Study App
 1. Run command (if ios simuator not showing): ``` sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer ```
 1. On  
 1. Spotlight: type "simulator"
-1. (second option) terminal type: open -a simulator 
+1. (second option) terminal type: open -a simulator
+
+# Dart & Flutter
+
+1. StatelessWidget: hard cache (doesn't change)
+1. MaterialApp: configs do app (locale, theme, routes...)
+1. On Dart the {} on parameter means optional param
+1. "final" means an attr that must be initialized
+1. "_" before class means private
+1. To update the screen (drawign) must call the: setState(() {}) --> used to refresh the entire screen at once time
+  1. --> receive a lambda (unnamed function)
+1. What changes goes on Stateless
+1. What is unchangable goes on State/Stateful
+1. To enable the app to use the Device options like store an image need to create a request with a permission:
+```
+  final statuses = [
+    Permission.storage
+  ].request();
+```
+1. --> To add it request to the project:
+  1. open pubspec.yaml (flutter permission handler on google > click on installing):
+    ```yaml
+      dependencies:
+        permission_handler: ^8.3.0
+    ```
+  1. Click on "Pub get" to install the dependencies
+  1. To add ANDROID PERMISSION:
+    1. android > app > src > AndroidManifest.xml
+    1. <uses-permission android:name="android.permission.WRITE_EXTERNAL...">
+1. Adding Assets to Flutter:
+  1. create an asset folder on root of the app
+  1. uncomment "asset:" at "pubspec.yaml"
+  ```yaml
+    assets:
+      - assets/
+  ```

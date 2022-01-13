@@ -1,4 +1,7 @@
+import 'package:app/config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'black.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,8 +13,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    String title = Config.APP_TITLE;
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: title,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -22,9 +26,9 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blueGrey, // primaryBlack, //Colors.teal,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: Config.APP_TITLE),
     );
   }
 }
@@ -48,16 +52,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  String _walletAddress = 'No wallet yet';
+  final double _amountEther = 0;
 
-  void _incrementCounter() {
+  void _createWallet() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
+      _walletAddress = '0x72a686B13e560E633359ad79DD3Af8b697A2a50B';
     });
   }
 
@@ -95,20 +100,59 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            const SizedBox(
+              width: 150,
+              child: Image(
+                image: AssetImage('assets/ethereum.png'),
+              ),
             ),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              '$_amountEther ETH',
+              style: Theme.of(context).textTheme.headline2,
             ),
+            Text(
+                'network: rinkeby',
+                style: Theme.of(context).textTheme.headline6,
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
+              child:
+                Text(
+                  _walletAddress,
+                  style: const TextStyle(fontSize: 25.0),
+                  textAlign: TextAlign.center
+                ),
+            ),
+            // Container(
+            //   child:
+            //   Row(
+            //       mainAxisAlignment: MainAxisAlignment.center,
+            //       crossAxisAlignment: CrossAxisAlignment.end,
+            //       children: [
+            //         Column(
+            //           crossAxisAlignment: CrossAxisAlignment.start,
+            //           children: [
+            //             Container(
+            //               padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
+            //               child:
+            //               Text(
+            //                     _walletAddress,
+            //                     style: const TextStyle(fontSize: 25.0),
+            //                     textAlign: TextAlign.center
+            //                 ),
+            //             ),
+            //           ],
+            //         ),
+            //       ]
+            //   )
+            // )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _createWallet,
         tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.account_balance),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
