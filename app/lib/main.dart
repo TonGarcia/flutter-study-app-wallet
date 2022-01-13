@@ -111,41 +111,28 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headline2,
             ),
             Text(
-                'network: rinkeby',
-                style: Theme.of(context).textTheme.headline6,
+              'network: rinkeby',
+              style: Theme.of(context).textTheme.headline6,
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
-              child:
-                Text(
-                  _walletAddress,
-                  style: const TextStyle(fontSize: 25.0),
-                  textAlign: TextAlign.center
-                ),
-            ),
-            // Container(
-            //   child:
-            //   Row(
-            //       mainAxisAlignment: MainAxisAlignment.center,
-            //       crossAxisAlignment: CrossAxisAlignment.end,
-            //       children: [
-            //         Column(
-            //           crossAxisAlignment: CrossAxisAlignment.start,
-            //           children: [
-            //             Container(
-            //               padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
-            //               child:
-            //               Text(
-            //                     _walletAddress,
-            //                     style: const TextStyle(fontSize: 25.0),
-            //                     textAlign: TextAlign.center
-            //                 ),
-            //             ),
-            //           ],
-            //         ),
-            //       ]
-            //   )
-            // )
+            Row(
+              children: [
+                 Container(
+                   width: 300,
+                   padding: const EdgeInsets.only(left: 40.0),
+                   child: Text(_walletAddress,
+                       style: const TextStyle(fontSize: 25.0),
+                       textAlign: TextAlign.center),
+                 ),
+                const SizedBox(width: 20.0),
+                IconButton(
+                    onPressed: (){
+                      Clipboard.setData(ClipboardData(text: _walletAddress));
+                    },
+                    icon: Icon(Icons.content_copy),
+                    color: Colors.blue,
+                )
+              ],
+            )
           ],
         ),
       ),
