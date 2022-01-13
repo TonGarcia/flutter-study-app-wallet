@@ -148,9 +148,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Container(
                   padding: const EdgeInsets.all(20.0),
-                  child: const TextField(
+                  child: TextField(
                     maxLines: null,
-                    decoration: InputDecoration(
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^[\d+]{0,8}\.?[\d*]{0,8}')),
+                    ],
+                    decoration: const InputDecoration(
                       hintText: 'Amount to be send',
                     ),
                   )
