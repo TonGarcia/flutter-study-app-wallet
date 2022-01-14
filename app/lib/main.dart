@@ -1,6 +1,9 @@
 import 'package:app/config.dart';
+import 'package:app/wallet_address_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart';
+import 'package:web3dart/web3dart.dart';
 import 'black.dart';
 
 void main() {
@@ -13,9 +16,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    String title = Config.APP_TITLE;
     return MaterialApp(
-      title: title,
+      title: Config.appTitle,
+      //debugShowCheckedModeBanner: false, # TODO to remove debug label
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -28,7 +31,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blueGrey, // primaryBlack, //Colors.teal,
       ),
-      home: const MyHomePage(title: Config.APP_TITLE),
+      home: const MyHomePage(title: Config.appTitle),
     );
   }
 }
@@ -52,8 +55,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _walletAddress = 'No wallet yet';
+  String _walletPrivate = '';
+  String _walletAddress = Config.noWalletStr;
+  String _seedPhrase = Config.noSeedPhraseStr;
   final double _amountEther = 0;
+
+  late Client httpClient;
+  late Web3Client ethClient;
+  late WalletAddress walletService;
+
+  @override
+  void initState() {
+    super.initState();
+    httpClient = Client();
+    ethClient = Web3Client(Config.rinkebyUrl, httpClient);
+    walletService = WalletAddress();
+  }
 
   void _createWallet() {
     setState(() {
@@ -62,8 +79,29 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _walletAddress = '0x72a686B13e560E633359ad79DD3Af8b697A2a50B';
+      //_walletAddress = '0x72a686B13e560E633359ad79DD3Af8b697A2a50B';
+      //_seedPhrase = 'note bunker blood duty reunion ranch citizen ability vapor arch minute net biology upset tissue';
+      if(_walletAddress == Config.noWalletStr || _seedPhrase == Config.noSeedPhraseStr) {
+        _seedPhrase = walletService.generateMnemonic();
+        _walletPrivate = walletService.getPrivateKey(_seedPhrase).toString();
+
+      }
     });
+  }
+
+  Future<DeployedContract> loadContract() async {
+    String abi = await rootBundle.loadString('assets/abi.json');
+    String contractAddress = "...";
+    final contract = DeployedContract(ContractAbi.fromJson(abi, "CoinName"), EthereumAddress.fromHex(contractAddress));
+    return contract;
+  }
+
+  Future<dynamic> query(String functionName, List<dynamic> args) async {
+    final contract = await loadContract();
+  }
+
+  Future<void> updateBalance() async {
+    EthereumAddress address = EthereumAddress.fromHex(_walletAddress);
   }
 
   @override
@@ -109,13 +147,49 @@ class _MyHomePageState extends State<MyHomePage> {
                   image: AssetImage('assets/ethereum.png'),
                 ),
               ),
-              Text(
-                '$_amountEther ETH',
-                style: Theme.of(context).textTheme.headline2,
+              Row(
+                children: [
+                  Container(
+                    width: 300,
+                    padding: const EdgeInsets.only(left: 90.0),
+                    child:
+                    Text(
+                      '$_amountEther ETH',
+                      style: Theme.of(context).textTheme.headline2,
+                    ),
+                  ),
+                  const SizedBox(width: 20.0),
+                  IconButton(
+                    onPressed: (){
+                      updateBalance();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    color: Colors.blue,
+                  )
+                ],
               ),
               Text(
                 'network: rinkeby',
                 style: Theme.of(context).textTheme.headline6,
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 300,
+                    padding: const EdgeInsets.only(left: 40.0),
+                    child: Text(_seedPhrase,
+                        style: const TextStyle(fontSize: 15.0),
+                        textAlign: TextAlign.center),
+                  ),
+                  const SizedBox(width: 20.0),
+                  IconButton(
+                    onPressed: (){
+                      Clipboard.setData(ClipboardData(text: _seedPhrase));
+                    },
+                    icon: const Icon(Icons.content_copy),
+                    color: Colors.blue,
+                  )
+                ],
               ),
               Row(
                 children: [
@@ -131,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: (){
                       Clipboard.setData(ClipboardData(text: _walletAddress));
                     },
-                    icon: Icon(Icons.content_copy),
+                    icon: const Icon(Icons.content_copy),
                     color: Colors.blue,
                   )
                 ],

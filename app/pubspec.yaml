@@ -33,6 +33,23 @@ dependencies:
   # Permission management
   permission_handler: ^8.3.0
 
+  # Web3 Dart integration
+  web3dart: ^2.3.3
+
+  # Minimalist custom design
+  velocity_x: ^3.3.0
+
+  # Http client
+  http: ^0.13.4
+
+  # Mnemonic & Encryption
+  bip39: ^1.0.6
+
+  # HD Key encryption generator
+  ed25519_hd_key: ^2.2.0
+
+  # Hex encryption
+  hex: ^0.2.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
