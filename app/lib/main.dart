@@ -1,4 +1,5 @@
 import 'package:app/config.dart';
+import 'package:app/user_data.dart';
 import 'package:app/wallet_address_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: Config.appTitle,
-      //debugShowCheckedModeBanner: false, # TODO to remove debug label
+      debugShowCheckedModeBanner: false, // removes the debug label
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -55,37 +56,35 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _walletPrivate = '';
-  String _walletAddress = Config.noWalletStr;
-  String _seedPhrase = Config.noSeedPhraseStr;
-  final double _amountEther = 0;
+  late num _amountEther = 0;
+  late UserData _userWalletData;
 
   late Client httpClient;
   late Web3Client ethClient;
-  late WalletAddress walletService;
 
   @override
   void initState() {
     super.initState();
     httpClient = Client();
     ethClient = Web3Client(Config.rinkebyUrl, httpClient);
-    walletService = WalletAddress();
+    bool autoGenerateWallet = false;
+    _userWalletData = UserData();
+    _userWalletData.loadUserData(autoGenerateWallet);
   }
 
   void _createWallet() {
-    setState(() {
+    setState(() async {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
+
+      _userWalletData.createWallet();
+
       //_walletAddress = '0x72a686B13e560E633359ad79DD3Af8b697A2a50B';
       //_seedPhrase = 'note bunker blood duty reunion ranch citizen ability vapor arch minute net biology upset tissue';
-      if(_walletAddress == Config.noWalletStr || _seedPhrase == Config.noSeedPhraseStr) {
-        _seedPhrase = walletService.generateMnemonic();
-        _walletPrivate = walletService.getPrivateKey(_seedPhrase).toString();
 
-      }
     });
   }
 
@@ -101,7 +100,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> updateBalance() async {
-    EthereumAddress address = EthereumAddress.fromHex(_walletAddress);
+    num amountEther = await _userWalletData.getBalance();
+    setState(() {
+      _amountEther = amountEther;
+    });
   }
 
   @override
@@ -154,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: const EdgeInsets.only(left: 90.0),
                     child:
                     Text(
-                      '$_amountEther ETH',
+                      '$_amountEther',
                       style: Theme.of(context).textTheme.headline2,
                     ),
                   ),
@@ -177,14 +179,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   Container(
                     width: 300,
                     padding: const EdgeInsets.only(left: 40.0),
-                    child: Text(_seedPhrase,
+                    child: Text(_userWalletData.seedPhrase,
                         style: const TextStyle(fontSize: 15.0),
                         textAlign: TextAlign.center),
                   ),
                   const SizedBox(width: 20.0),
                   IconButton(
                     onPressed: (){
-                      Clipboard.setData(ClipboardData(text: _seedPhrase));
+                      Clipboard.setData(ClipboardData(text: _userWalletData.seedPhrase));
                     },
                     icon: const Icon(Icons.content_copy),
                     color: Colors.blue,
@@ -196,14 +198,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   Container(
                     width: 300,
                     padding: const EdgeInsets.only(left: 40.0),
-                    child: Text(_walletAddress,
+                    child: Text(_userWalletData.publicAddress,
                         style: const TextStyle(fontSize: 25.0),
                         textAlign: TextAlign.center),
                   ),
                   const SizedBox(width: 20.0),
                   IconButton(
                     onPressed: (){
-                      Clipboard.setData(ClipboardData(text: _walletAddress));
+                      Clipboard.setData(ClipboardData(text: _userWalletData.publicAddress));
                     },
                     icon: const Icon(Icons.content_copy),
                     color: Colors.blue,
