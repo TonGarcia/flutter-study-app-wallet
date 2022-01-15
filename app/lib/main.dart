@@ -241,11 +241,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createWallet,
-        tooltip: 'Increment',
-        child: const Icon(Icons.account_balance),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _createWallet,
+      //   tooltip: 'Increment',
+      //   child: const Icon(Icons.account_balance),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
