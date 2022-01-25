@@ -1,6 +1,12 @@
-# app
+# APP
 
 A new Flutter project.
+
+# KEYTOOL
+
+C:\Program Files\OpenJDK
+C:\Program Files\OpenJDK\openjdk-8u312-b07\jre\lib\security\cacerts
+keytool -storepasswd -keystore C:\Program Files\OpenJDK\openjdk-8u312-b07\jre\lib\security\cacerts
 
 ## Getting Started
 
@@ -14,3 +20,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+# ETHEREUM
+
+Check the ./app/smart_contracts/README_EthereumSmartContract.md

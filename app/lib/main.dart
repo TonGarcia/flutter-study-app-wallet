@@ -1,11 +1,12 @@
 import 'package:app/config.dart';
 import 'package:app/user_data.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:app/wallet_address_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
-import 'black.dart';
+// import 'black.dart';
 
 void main() {
   runApp(const MyApp());
@@ -62,6 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
   late Client httpClient;
   late Web3Client ethClient;
 
+  final WalletService _walletService = WalletService();
+  final TextEditingController _amountEditorController = TextEditingController();
+  final TextEditingController _targetAddressEditorController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -72,31 +77,31 @@ class _MyHomePageState extends State<MyHomePage> {
     _userWalletData.loadUserData(autoGenerateWallet);
   }
 
-  void _createWallet() {
-    setState(() async {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
+  // void _createWallet() {
+  //   setState(() async {
+  //     // This call to setState tells the Flutter framework that something has
+  //     // changed in this State, which causes it to rerun the build method below
+  //     // so that the display can reflect the updated values. If we changed
+  //     // _counter without calling setState(), then the build method would not be
+  //     // called again, and so nothing would appear to happen.
+  //
+  //     _userWalletData.createWallet();
+  //
+  //     //_walletAddress = '0x72a686B13e560E633359ad79DD3Af8b697A2a50B';
+  //     //_seedPhrase = 'note bunker blood duty reunion ranch citizen ability vapor arch minute net biology upset tissue';
+  //
+  //   });
+  // }
 
-      _userWalletData.createWallet();
-
-      //_walletAddress = '0x72a686B13e560E633359ad79DD3Af8b697A2a50B';
-      //_seedPhrase = 'note bunker blood duty reunion ranch citizen ability vapor arch minute net biology upset tissue';
-
-    });
-  }
-
-  Future<DeployedContract> loadContract() async {
-    String abi = await rootBundle.loadString('assets/abi.json');
+  Future<DeployedContract> loadLocalContract() async {
+    String abi = await rootBundle.loadString('assets/easy_wallet_abi.json');
     String contractAddress = "...";
     final contract = DeployedContract(ContractAbi.fromJson(abi, "CoinName"), EthereumAddress.fromHex(contractAddress));
     return contract;
   }
 
   Future<dynamic> query(String functionName, List<dynamic> args) async {
-    final contract = await loadContract();
+    // final contract = await loadLocalContract();
   }
 
   Future<void> updateBalance() async {
@@ -214,10 +219,11 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Container(
                   padding: const EdgeInsets.all(20.0),
-                  child: const TextField(
+                  child: TextField(
                     maxLines: null,
-                    decoration: InputDecoration(
-                      hintText: 'Set public address to send funds',
+                    controller: _targetAddressEditorController,
+                    decoration: const InputDecoration(
+                      hintText: 'Set (ETHEREUM RINKEBY) public address to send funds',
                     ),
                     keyboardType: TextInputType.multiline,
                   )
@@ -231,12 +237,77 @@ class _MyHomePageState extends State<MyHomePage> {
                       FilteringTextInputFormatter.allow(RegExp(r'^[\d+]{0,8}\.?[\d*]{0,8}')),
                     ],
                     decoration: const InputDecoration(
-                      hintText: 'Amount to be send',
+                      hintText: 'Amount of ETHEREUM RINKEBY to be sent',
                     ),
                   )
               ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: <Color>[
+                              Color(0xFF282A36),
+                              Color(0xFF204799),
+                              Color(0xFF1260CD),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.all(16.0),
+                        primary: Colors.white,
+                        textStyle: const TextStyle(fontSize: 20),
+                      ),
+                      onPressed: () {
+                        final amountToSend = _amountEditorController.text;
+                        final ethereumToAddress = _targetAddressEditorController.text;
+                        final validEthereumAddress = _walletService.validatePublicAddress(ethereumToAddress);
+
+                        if(amountToSend.isEmpty || ethereumToAddress.isEmpty || validEthereumAddress.isNotEmpty) {
+                          String contentMsg = "Check the values you entered and try again";
+
+                          if(validEthereumAddress.isNotEmpty) contentMsg = validEthereumAddress;
+
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                backgroundColor: Colors.blueGrey,
+                                title: const Text("Invalid values"),
+                                content: Text(contentMsg),
+                                actions: [
+                                  MaterialButton(
+                                    child: const Text("OK"),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    }
+                                  )
+                                ]
+                              );
+                            }
+                          );
+
+                          return;
+                        }
+
+                        print('amountToSend: ' + amountToSend);
+                        print('ethereumToAddress: ' + ethereumToAddress);
+                      },
+                      icon: const Icon(Icons.call_made_outlined),
+                      label: const Text('Send transaction'),
+                    ),
+                  ],
+                ),
+              ),
               Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom))
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom)
+              )
             ],
           ),
         ),

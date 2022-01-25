@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:app/config.dart';
 import 'package:app/wallet_address_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web3dart/credentials.dart';
+// import 'package:web3dart/credentials.dart';
 
 class UserData {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String walletPublicKey = '', walletPrivateKey = '', publicAddress = '', seedPhrase = '';
-  late WalletAddress walletService;
+  late WalletService walletService;
 
   UserData();
 
@@ -23,7 +23,7 @@ class UserData {
   }
 
   void loadUserData(bool autoGenerateWallet) {
-    walletService = WalletAddress();
+    walletService = WalletService();
 
     // TODO load from Cloud if NULL loads from local
     loadUserDefaults();

@@ -4,22 +4,39 @@ import 'package:hex/hex.dart';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart';
+import 'package:web_socket_channel/io.dart';
+
+class TransactionDTO {
+  late String privateKey;
+  late String fromAddress;
+  late String toAddress;
+  late EtherUnit unit;
+  late double amount;
+
+  TransactionDTO(this.privateKey, this.fromAddress,
+                 this.toAddress, this.unit, this.amount);
+}
 
 abstract class WalletAddressService {
   String generateMnemonic();
+  EthPrivateKey getCredentials(String privateKey);
   Future<num> getBalance(String privateKey);
   Future<String> getPrivateKey(String mnemonic);
   Future<EthereumAddress> getPublicKey(String privateKey);
-  Future<List<dynamic>> query(String functionName, List<dynamic> args);
+  Future<Transaction> prepareTransaction(TransactionDTO transaction);
+  void sendEther(Credentials credentials, TransactionDTO transactionDTO);
+  // Future<List<dynamic>> query(String functionName, List<dynamic> args);
 }
 
-class WalletAddress implements WalletAddressService {
+class WalletService implements WalletAddressService {
 
   final Client _httpClient = Client();
   late Web3Client _ethClient;
 
-  WalletAddress() {
-    _ethClient = Web3Client(Config.rinkebyUrl, _httpClient);
+  WalletService() {
+    _ethClient = Web3Client(Config.rinkebyUrl, _httpClient, socketConnector: () {
+      return IOWebSocketChannel.connect(Config.rinkebySocketUrl).cast<String>();
+    });
   }
 
   @override
@@ -50,8 +67,37 @@ class WalletAddress implements WalletAddressService {
   }
 
   @override
-  Future<List> query(String functionName, List args) {
-    // TODO: implement query over smart contract
-    throw UnimplementedError();
+  EthPrivateKey getCredentials(String privateKey) {
+    return EthPrivateKey.fromHex(privateKey);
   }
+
+  @override
+  Future<Transaction> prepareTransaction(TransactionDTO transaction) async {
+    EthereumAddress sender = EthereumAddress.fromHex(transaction.fromAddress);
+    EthereumAddress receiver = EthereumAddress.fromHex(transaction.toAddress);
+    EtherAmount etherAmount = EtherAmount.fromUnitAndValue(transaction.unit, transaction.amount);
+    return Transaction(from: sender, to: receiver, value: etherAmount);
+  }
+
+  @override
+  void sendEther(Credentials credentials, TransactionDTO transactionDTO) async {
+    Credentials credentials = getCredentials(transactionDTO.privateKey);
+    Transaction transaction = await prepareTransaction(transactionDTO);
+    _ethClient.sendTransaction(credentials, transaction);
+  }
+
+  String validatePublicAddress(String address) {
+    try {
+      EthereumAddress.fromHex(address, enforceEip55: true);
+      return '';
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  // @override
+  // Future<List> query(String functionName, List args) {
+  //   // TODO: implement query over smart contract
+  //   throw UnimplementedError();
+  // }
 }
