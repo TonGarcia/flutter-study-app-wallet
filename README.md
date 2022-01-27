@@ -87,3 +87,7 @@ New Sample Flutter Study App
       - assets/
   ```
 1. Flutter Wallet: https://medium.com/geekculture/crypto-wallet-app-using-flutter-and-solidity-9f67b0d0819f
+
+# Smart Contract Interaction
+
+https://itnext.io/writing-dapps-with-flutter-solidity-27d0621fd01

@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:app/config.dart';
-import 'package:app/wallet_address_service.dart';
+import 'package:app/wallet_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:web3dart/credentials.dart';
 
 class UserData {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();

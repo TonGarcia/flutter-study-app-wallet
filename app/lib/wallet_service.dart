@@ -4,17 +4,31 @@ import 'package:hex/hex.dart';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart';
-import 'package:web_socket_channel/io.dart';
+
+class EthNetwork {
+  static const rinkeby = 4;
+}
 
 class TransactionDTO {
+  late EthereumAddress fromAddress;
+  late EthereumAddress toAddress;
   late String privateKey;
-  late String fromAddress;
-  late String toAddress;
   late EtherUnit unit;
-  late double amount;
+  late BigInt amount;
+  final _wei = EtherAmount.fromUnitAndValue(EtherUnit.ether, 1).getInWei.toDouble();
 
-  TransactionDTO(this.privateKey, this.fromAddress,
-                 this.toAddress, this.unit, this.amount);
+  TransactionDTO(this.privateKey, String fromAddress,
+                 String toAddress, String amount) {
+
+    // convert string formatted number to EtherUnits
+    this.amount = BigInt.from(double.parse(amount) * _wei);
+    unit = EtherUnit.wei;
+
+    // Convert strings into addresses
+    this.fromAddress = EthereumAddress.fromHex(fromAddress);
+    this.toAddress = EthereumAddress.fromHex(toAddress);
+
+  }
 }
 
 abstract class WalletAddressService {
@@ -24,7 +38,7 @@ abstract class WalletAddressService {
   Future<String> getPrivateKey(String mnemonic);
   Future<EthereumAddress> getPublicKey(String privateKey);
   Future<Transaction> prepareTransaction(TransactionDTO transaction);
-  void sendEther(Credentials credentials, TransactionDTO transactionDTO);
+  void sendEther(TransactionDTO transactionDTO);
   // Future<List<dynamic>> query(String functionName, List<dynamic> args);
 }
 
@@ -34,9 +48,7 @@ class WalletService implements WalletAddressService {
   late Web3Client _ethClient;
 
   WalletService() {
-    _ethClient = Web3Client(Config.rinkebyUrl, _httpClient, socketConnector: () {
-      return IOWebSocketChannel.connect(Config.rinkebySocketUrl).cast<String>();
-    });
+    _ethClient = Web3Client(Config.rinkebyUrl, _httpClient);
   }
 
   @override
@@ -73,22 +85,22 @@ class WalletService implements WalletAddressService {
 
   @override
   Future<Transaction> prepareTransaction(TransactionDTO transaction) async {
-    EthereumAddress sender = EthereumAddress.fromHex(transaction.fromAddress);
-    EthereumAddress receiver = EthereumAddress.fromHex(transaction.toAddress);
+    EthereumAddress sender = transaction.fromAddress;
+    EthereumAddress receiver = transaction.toAddress;
     EtherAmount etherAmount = EtherAmount.fromUnitAndValue(transaction.unit, transaction.amount);
     return Transaction(from: sender, to: receiver, value: etherAmount);
   }
 
   @override
-  void sendEther(Credentials credentials, TransactionDTO transactionDTO) async {
+  void sendEther(TransactionDTO transactionDTO) async {
     Credentials credentials = getCredentials(transactionDTO.privateKey);
     Transaction transaction = await prepareTransaction(transactionDTO);
-    _ethClient.sendTransaction(credentials, transaction);
+    _ethClient.sendTransaction(credentials, transaction, chainId: EthNetwork.rinkeby);
   }
 
   String validatePublicAddress(String address) {
     try {
-      EthereumAddress.fromHex(address, enforceEip55: true);
+      EthereumAddress.fromHex(address);
       return '';
     } catch (e) {
       return e.toString();
