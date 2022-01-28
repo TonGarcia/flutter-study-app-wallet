@@ -319,7 +319,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Padding(
                   padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom)
-              )
+              ),
+
             ],
           ),
         ),
