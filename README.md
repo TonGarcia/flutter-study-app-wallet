@@ -90,6 +90,22 @@ New Sample Flutter Study App
 
 # Smart Contract Interaction
 
+Smart Contract Interaction Flutter
 https://itnext.io/writing-dapps-with-flutter-solidity-27d0621fd01
 
+Smart Contract Interaction Firebase
 https://miro.medium.com/max/700/1*BXhP_Vt_XzBu3YnDQOXGLw.png
+
+ERC20 Solidity
+https://solidity-by-example.org/app/erc20/
+
+# If Device Manager from Android Studio not openning
+
+IntelliJ (Android Studio) wants to know what kind of project you have to show the right menus.
+
+click left in file tree on the root node (project name)
+MENU -> FILE -> PROJECT STRUCTURE
+select left MODULES
+hit + button to add ANDROID
+hit OK Button
+top of the root node (project name) select PROJECT... to see your old view

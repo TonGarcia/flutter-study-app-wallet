@@ -8,7 +8,9 @@ class UserData {
   String walletPublicKey = '', walletPrivateKey = '', publicAddress = '', seedPhrase = '';
   late WalletService walletService;
 
-  UserData();
+  UserData(bool autoGenerateWallet) {
+    loadUserData(autoGenerateWallet);
+  }
 
   void setUserDefaults(String walletPublicKey, String walletPrivateKey,
                        String publicAddress, String seedPhrase) async {
@@ -18,6 +20,7 @@ class UserData {
     prefs.setString('walletPrivateKey', walletPrivateKey);
     prefs.setString('publicAddress', publicAddress);
     prefs.setString('seedPhrase', seedPhrase);
+    loadUserDefaults();
 
   }
 
@@ -29,8 +32,8 @@ class UserData {
 
     // create wallet if no defaults
     if(autoGenerateWallet == true &&
-        (walletPublicKey == '' || walletPrivateKey == '' ||
-        publicAddress == '' || seedPhrase == '')
+        (walletPublicKey.isEmpty || walletPrivateKey.isEmpty ||
+        publicAddress.isEmpty || seedPhrase.isEmpty)
     ) {
       createWallet();
     }
@@ -56,6 +59,10 @@ class UserData {
   }
 
   Future<num> getBalance() async {
+    return await walletService.getBalance(walletPrivateKey);
+  }
+
+  Future<num> getSmartContractBalance() async {
     return await walletService.getBalance(walletPrivateKey);
   }
 

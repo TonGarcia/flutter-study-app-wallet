@@ -59,11 +59,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late num _amountEther = 0;
   late UserData _userWalletData;
+  late num _smartContractBalance = 0;
 
   late Client httpClient;
   late Web3Client ethClient;
 
   final WalletService _walletService = WalletService();
+  final TextEditingController _contractAddress = TextEditingController();
   final TextEditingController _amountEditorController = TextEditingController();
   final TextEditingController _targetAddressEditorController = TextEditingController();
 
@@ -72,26 +74,9 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     httpClient = Client();
     ethClient = Web3Client(Config.rinkebyUrl, httpClient);
-    bool autoGenerateWallet = false;
-    _userWalletData = UserData();
-    _userWalletData.loadUserData(autoGenerateWallet);
+    bool autoGenerateWallet = true;
+    _userWalletData = UserData(autoGenerateWallet);
   }
-
-  // void _createWallet() {
-  //   setState(() async {
-  //     // This call to setState tells the Flutter framework that something has
-  //     // changed in this State, which causes it to rerun the build method below
-  //     // so that the display can reflect the updated values. If we changed
-  //     // _counter without calling setState(), then the build method would not be
-  //     // called again, and so nothing would appear to happen.
-  //
-  //     _userWalletData.createWallet();
-  //
-  //     //_walletAddress = '0x72a686B13e560E633359ad79DD3Af8b697A2a50B';
-  //     //_seedPhrase = 'note bunker blood duty reunion ranch citizen ability vapor arch minute net biology upset tissue';
-  //
-  //   });
-  // }
 
   Future<DeployedContract> loadLocalContract() async {
     String abi = await rootBundle.loadString('assets/easy_wallet_abi.json');
@@ -108,6 +93,13 @@ class _MyHomePageState extends State<MyHomePage> {
     num amountEther = await _userWalletData.getBalance();
     setState(() {
       _amountEther = amountEther;
+    });
+  }
+
+  Future<void> updateSmartContractBalance() async {
+    num amountSmartContract = await _userWalletData.getSmartContractBalance();
+    setState(() {
+      _smartContractBalance = amountSmartContract;
     });
   }
 
@@ -244,6 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   )
               ),
+              // SEND BUTTON
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: Stack(
@@ -320,7 +313,45 @@ class _MyHomePageState extends State<MyHomePage> {
               Padding(
                   padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom)
               ),
-
+              // LOAD SMART CONTRACT BALANCE
+              Container(
+                  padding: const EdgeInsets.all(20.0),
+                  child: TextField(
+                    maxLines: null,
+                    controller: _contractAddress,
+                    decoration: const InputDecoration(
+                      hintText: 'Smart Contract address on ETHEREUM RINKEBY to be tracked',
+                    ),
+                  )
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 300,
+                    padding: const EdgeInsets.only(left: 90.0),
+                    child:
+                    Text(
+                      '$_smartContractBalance',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
+                  ),
+                  const SizedBox(width: 20.0),
+                  IconButton(
+                    onPressed: (){
+                      updateBalance();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    color: Colors.blue,
+                  )
+                ],
+              ),
+              Text(
+                'smart contract balance',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+              Padding(
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom)
+              ),
             ],
           ),
         ),
