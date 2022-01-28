@@ -48,6 +48,15 @@ class UserData {
     seedPhrase = prefs.getString('seedPhrase') ?? Config.noSeedPhraseStr;
   }
 
+  void loadWallet(String seedPhrase) async {
+    final privateKey = await walletService.getPrivateKey(seedPhrase);
+    final publicKey = await walletService.getPublicKey(privateKey);
+    walletPrivateKey = privateKey;
+    walletPublicKey = publicKey.toString();
+    publicAddress = publicKey.toString();
+    setUserDefaults(walletPublicKey, walletPrivateKey, publicAddress, seedPhrase);
+  }
+
   void createWallet() async {
     seedPhrase = walletService.generateMnemonic();
     final privateKey = await walletService.getPrivateKey(seedPhrase);

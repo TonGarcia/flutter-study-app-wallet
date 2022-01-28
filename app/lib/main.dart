@@ -66,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final WalletService _walletService = WalletService();
   final TextEditingController _contractAddress = TextEditingController();
+  final TextEditingController _seedPhraseController = TextEditingController();
   final TextEditingController _amountEditorController = TextEditingController();
   final TextEditingController _targetAddressEditorController = TextEditingController();
 
@@ -213,6 +214,49 @@ class _MyHomePageState extends State<MyHomePage> {
                   padding: const EdgeInsets.all(20.0),
                   child: TextField(
                     maxLines: null,
+                    controller: _seedPhraseController,
+                    decoration: const InputDecoration(
+                      hintText: 'Seed phrase to recover from',
+                    ),
+                  )
+              ),
+              // SEND BUTTON
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: <Color>[
+                              Color(0xFF282A36),
+                              Color(0xFF204799),
+                              Color(0xFF1260CD),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.all(16.0),
+                        primary: Colors.white,
+                        textStyle: const TextStyle(fontSize: 20),
+                      ),
+                      onPressed: () {
+                        _userWalletData.loadWallet(_seedPhraseController.text);
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Load wallet from seed'),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                  padding: const EdgeInsets.all(20.0),
+                  child: TextField(
+                    maxLines: null,
                     controller: _targetAddressEditorController,
                     decoration: const InputDecoration(
                       hintText: 'Set (ETHEREUM RINKEBY) public address to send funds',
@@ -309,9 +353,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                 ),
-              ),
-              Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom)
               ),
               // LOAD SMART CONTRACT BALANCE
               Container(
