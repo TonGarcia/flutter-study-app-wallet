@@ -2,6 +2,11 @@
 
 A new Flutter project.
 
+## Android bug fix
+
+1. Android Studio Gradle warning: https://github.com/flutter/flutter/issues/29608#issuecomment-548649907
+1.
+
 # KEYTOOL
 
 C:\Program Files\OpenJDK
