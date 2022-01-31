@@ -15,37 +15,39 @@ class UserData {
   void setUserDefaults(String walletPublicKey, String walletPrivateKey,
                        String publicAddress, String seedPhrase) async {
 
-    final SharedPreferences prefs = await _prefs;
-    prefs.setString('walletPublicKey', walletPublicKey);
-    prefs.setString('walletPrivateKey', walletPrivateKey);
-    prefs.setString('publicAddress', publicAddress);
-    prefs.setString('seedPhrase', seedPhrase);
-    loadUserDefaults();
-
+    if (!(walletPublicKey.isEmpty || walletPrivateKey.isEmpty ||
+        publicAddress.isEmpty || seedPhrase.isEmpty)) {
+      final SharedPreferences prefs = await _prefs;
+      prefs.setString('walletPublicKey', walletPublicKey);
+      prefs.setString('walletPrivateKey', walletPrivateKey);
+      prefs.setString('publicAddress', publicAddress);
+      prefs.setString('seedPhrase', seedPhrase);
+      bool autoGenerateWallet = false;
+      loadUserDefaults(autoGenerateWallet);
+    }
   }
 
   void loadUserData(bool autoGenerateWallet) {
     walletService = WalletService();
 
     // TODO load from Cloud if NULL loads from local
-    loadUserDefaults();
-
-    // create wallet if no defaults
-    if(autoGenerateWallet == true &&
-        (walletPublicKey.isEmpty || walletPrivateKey.isEmpty ||
-        publicAddress.isEmpty || seedPhrase.isEmpty)
-    ) {
-      createWallet();
-    }
+    loadUserDefaults(autoGenerateWallet);
 
   }
 
-  void loadUserDefaults() async {
+  void loadUserDefaults(bool autoGenerateWallet) async {
     final SharedPreferences prefs = await _prefs;
     walletPublicKey = prefs.getString('walletPublicKey') ?? '';
     walletPrivateKey = prefs.getString('walletPrivateKey') ?? '';
     publicAddress = prefs.getString('publicAddress') ?? Config.noWalletStr;
     seedPhrase = prefs.getString('seedPhrase') ?? Config.noSeedPhraseStr;
+
+    if(autoGenerateWallet == true &&
+        (walletPublicKey.isEmpty || walletPrivateKey.isEmpty ||
+            publicAddress.isEmpty || seedPhrase.isEmpty)
+    ) {
+      createWallet();
+    }
   }
 
   void loadWallet(String seedPhrase) async {
