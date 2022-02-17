@@ -25,6 +25,11 @@ New Sample Flutter Study App
 1. Open Android Studio Preferences > Plugins > Browse Repository > Flutter Plugin : INSTALL IT
 1. Now Android Studio shows up the Flutter option for projects
 
+## Android bug fix
+
+1. Android Studio Gradle warning: https://github.com/flutter/flutter/issues/29608#issuecomment-548649907
+1. IF SHADER BUG: on emulator screen click on "..." icon > go to settings > tab advanced > change OpenGL ES API to "Compatibility"
+
 ## Visual Code
 
 1. Install Flutter PlugIns
@@ -109,3 +114,7 @@ select left MODULES
 hit + button to add ANDROID
 hit OK Button
 top of the root node (project name) select PROJECT... to see your old view
+
+# Crypto Providers
+
+As client we use the same Rainbow GraphQL client framework (at ReactNative it is known as Apollo at Flutter it is known as graphql-flutter) and same provider: TheGraph.
