@@ -43,7 +43,7 @@ class _PocEthereumWalletPageState extends State<PocEthereumWalletPage> {
   void initState() {
     super.initState();
     httpClient = Client();
-    ethClient = Web3Client(Config.rinkebyUrl, httpClient);
+    ethClient = Web3Client(Config.ethereumUrl, httpClient);
     bool autoGenerateWallet = true;
     _userWalletData = UserData(autoGenerateWallet);
   }

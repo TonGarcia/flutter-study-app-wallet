@@ -1,4 +1,6 @@
+import 'package:app/components/pages/poc/poc_collateralize_page.dart';
 import 'package:app/components/pages/poc/poc_ethereum_wallet_page.dart';
+import 'package:app/components/pages/poc/poc_repay_page.dart';
 import 'package:app/config.dart';
 import 'package:app/models/user_data.dart';
 import 'package:app/services/wallet_service.dart';
@@ -22,21 +24,23 @@ class MyApp extends StatelessWidget {
       title: Config.appTitle,
       debugShowCheckedModeBanner: false, // removes the debug label
       home: DefaultTabController(
-        length: 2,
+        length: 3,
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.blueGrey,
             bottom: const TabBar(
               tabs: [
                 Tab(text: 'Ethereum Wallet', icon: FaIcon(FontAwesomeIcons.wallet)),
-                Tab(text: 'Integration', icon: Icon(Icons.star))
+                Tab(text: 'Collateralize', icon: FaIcon(Icons.star)),
+                Tab(text: 'Repay', icon: Icon(Icons.published_with_changes))
               ],
             ),
           ),
-          body: TabBarView(
+          body: const TabBarView(
             children: [
               PocEthereumWalletPage(title: Config.appTitle),
-              Center(child: Text('Tab 2 Content'))
+              PocCollateralizePage(),
+              PocRepayPage()
             ],
           )
         ),
