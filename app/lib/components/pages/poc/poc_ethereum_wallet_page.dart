@@ -46,6 +46,7 @@ class _PocEthereumWalletPageState extends State<PocEthereumWalletPage> {
     ethClient = Web3Client(Config.ethereumUrl, httpClient);
     bool autoGenerateWallet = true;
     _userWalletData = UserData(autoGenerateWallet);
+    updateBalance();
   }
 
   Future<DeployedContract> loadLocalContract() async {
@@ -82,6 +83,7 @@ class _PocEthereumWalletPageState extends State<PocEthereumWalletPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     double screenWidth = MediaQuery.of(context).size.width;
+    updateBalance();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(

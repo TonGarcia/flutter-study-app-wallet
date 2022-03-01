@@ -245,6 +245,42 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         ),
                       ],
                     ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 25.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Stack(
+                          children: <Widget>[
+                            Positioned.fill(
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: <Color>[
+                                      Color(0xFF282A36),
+                                      Color(0xFF204799),
+                                      Color(0xFF1260CD),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            TextButton.icon(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.all(16.0),
+                                primary: Colors.white,
+                                textStyle: const TextStyle(fontSize: 20),
+                              ),
+                              onPressed: () {
+                                //_userWalletData.loadWallet(_seedPhraseController.text);
+                              },
+                              icon: const Icon(Icons.star),
+                              label: const Text('Open collateral position'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+
                   ]
               ),
             )
