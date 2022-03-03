@@ -73,6 +73,7 @@ class WalletService implements WalletAddressService {
 
   @override
   Future<num> getBalance(String privateKey) async {
+    if(privateKey.isEmpty) return 0;
     final credentials = EthPrivateKey.fromHex(privateKey);
     EtherAmount balance = await _ethClient.getBalance(credentials.address);
     return balance.getValueInUnit(EtherUnit.ether);

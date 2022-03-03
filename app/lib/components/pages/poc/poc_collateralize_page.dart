@@ -61,6 +61,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         )
                       ],
                     ),
+                    // Deposit Ether input
                     Container(
                         padding: const EdgeInsets.all(20.0),
                         child: TextField(
@@ -87,6 +88,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         child: Text('Max $_maxStable USDM'),
                       )
                     ),
+                    // Generate USD stable coin
                     Container(
                         padding: const EdgeInsets.all(20.0),
                         child: TextField(
@@ -100,6 +102,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           ),
                         )
                     ),
+                    // Vault changes
                     Container(
                       child: Row(
                         children: [
@@ -113,6 +116,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         ]
                       ),
                     ),
+                    // Collateral Locked
                     Row(
                       children: [
                         Container(
@@ -123,7 +127,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             ),
                           ),
                         Container(
-                            width: screenWidth*0.72,
+                            width: screenWidth*0.62,
                             padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                             child: Align(
                               alignment: Alignment.centerRight,
@@ -135,6 +139,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           ),
                       ],
                     ),
+                    // Collateralization Ratio
                     Row(
                       children: [
                         Container(
@@ -145,7 +150,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           ),
                         ),
                         Container(
-                            width: screenWidth*0.66,
+                            width: screenWidth*0.55,
                             padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                             child: Align(
                               alignment: Alignment.centerRight,
@@ -157,6 +162,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         ),
                       ],
                     ),
+                    // Liquidation Price
                     Row(
                       children: [
                         Container(
@@ -167,7 +173,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           ),
                         ),
                         Container(
-                            width: screenWidth*0.72,
+                            width: screenWidth*0.62,
                             padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                             child: Align(
                               alignment: Alignment.centerRight,
@@ -179,17 +185,18 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         ),
                       ],
                     ),
+                    // Vault USDM Debt
                     Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                           child: Text(
                             'Vault USDM Debt',
-                            style: Theme.of(context).textTheme.bodyText2,
+                            style: Theme.of(context).textTheme.bodyText1,
                           ),
                         ),
                         Container(
-                            width: screenWidth*0.72,
+                            width: screenWidth*0.61,
                             padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                             child: Align(
                               alignment: Alignment.centerRight,
@@ -201,17 +208,18 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         ),
                       ],
                     ),
+                    // Available to withdraw
                     Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                           child: Text(
                             'Available to withdraw',
-                            style: Theme.of(context).textTheme.bodyText2,
+                            style: Theme.of(context).textTheme.bodyText1,
                           ),
                         ),
                         Container(
-                            width: screenWidth*0.67,
+                            width: screenWidth*0.55,
                             padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                             child: Align(
                               alignment: Alignment.centerRight,
@@ -223,6 +231,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         ),
                       ],
                     ),
+                    // Available to generate
                     Row(
                       children: [
                         Container(
@@ -233,7 +242,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           ),
                         ),
                         Container(
-                            width: screenWidth*0.67,
+                            width: screenWidth*0.56,
                             padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                             child: Align(
                               alignment: Alignment.centerRight,
@@ -280,7 +289,6 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         ),
                       ),
                     )
-
                   ]
               ),
             )
