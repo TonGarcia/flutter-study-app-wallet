@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:app/models/user_data.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:app/config.dart';
@@ -37,13 +39,11 @@ class USDMDeFiService {
   }
 
   void setupContract() async {
-    // abiFile = await Config.abiUsdm();
-    // abiCode = await abiFile.readAsString();
-    abiCode = await rootBundle.loadString('assets/references/usdm/MintDollar-abi.json');
+    abiCode = await Config.abiUsdm();
     contract = DeployedContract(ContractAbi.fromJson(abiCode, 'USDM'), contractAddress);
 
     // extracting functions and events
-    transferEvent = contract.event('Transfer');
+    //transferEvent = contract.event('Transfer');
     balanceFunction = contract.function('balanceOf');
     calcProvidedRatioFunction = contract.function('calcProvidedRatio');
     estimateLiquidationPriceFunction = contract.function('estimateLiquidationPrice');

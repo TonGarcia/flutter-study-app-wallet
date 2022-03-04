@@ -70,9 +70,6 @@ dependencies:
   # GraphQL Client (like rainbow/react Apollo)
   graphql_flutter: ^5.0.1
 
-  # Path provider to open/read files
-  path_provider: ^2.0.9
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
