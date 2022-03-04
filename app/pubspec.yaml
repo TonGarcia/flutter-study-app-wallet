@@ -67,6 +67,12 @@ dependencies:
   # FontAwesome for flutter apps
   font_awesome_flutter: ^9.2.0
 
+  # GraphQL Client (like rainbow/react Apollo)
+  graphql_flutter: ^5.0.1
+
+  # Path provider to open/read files
+  path_provider: ^2.0.9
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -92,6 +98,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/references/
+    - assets/references/usdm/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

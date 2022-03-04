@@ -1,5 +1,6 @@
 import 'package:app/config.dart';
 import 'package:app/models/user_data.dart';
+import 'package:app/services/usdm_defi_service.dart';
 import 'package:app/services/wallet_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,12 +15,16 @@ class PocCollateralizePage extends StatefulWidget {
 }
 
 class _PocCollateralizePageState extends State<PocCollateralizePage> {
+
   late Client httpClient;
   late Web3Client ethClient;
-  late num _amountEther = 0;
-  late num _maxStable = 0;
+  late num _balanceAmountEther = 0;
+  late num _maxStable = 0.00;
   late UserData _userWalletData;
+  late USDMDeFiService deFi;
   final WalletService _walletService = WalletService();
+
+  final TextEditingController _depositETH = TextEditingController();
 
   @override
   void initState() {
@@ -28,6 +33,14 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
     ethClient = Web3Client(Config.ethereumUrl, httpClient);
     bool autoGenerateWallet = true;
     _userWalletData = UserData(autoGenerateWallet);
+    deFi = USDMDeFiService();
+  }
+
+  Future<void> updateBalance() async {
+    num amountEther = await _userWalletData.getBalance();
+    setState(() {
+      _balanceAmountEther = amountEther;
+    });
   }
 
   @override
@@ -44,17 +57,18 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                       children: [
                         Container(
                           width: screenWidth*0.8,
-                          padding: const EdgeInsets.only(left: 90.0),
+                          padding: const EdgeInsets.only(left: 20.0, top: 10.0),
                           child:
                           Text(
-                            'Balance: $_amountEther ETH',
+                            'Balance: $_balanceAmountEther',
                             style: Theme.of(context).textTheme.headline6,
                           ),
                         ),
-                        const SizedBox(width: 20.0),
+                        const SizedBox(width: 10.0),
                         IconButton(
+                          padding: const EdgeInsets.only(top: 10.0),
                           onPressed: (){
-                            // updateBalance();
+                            updateBalance();
                           },
                           icon: const Icon(Icons.refresh),
                           color: Colors.blue,
@@ -62,11 +76,26 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                       ],
                     ),
                     // Deposit Ether input
+                    TextButton(
+                        style: ButtonStyle(
+                            foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                            padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(right: 20.0))
+                        ),
+                        onPressed: () { },
+                        child: const Align(
+                          alignment: Alignment.topRight,
+                          child: Text('Max ETH balance'),
+                        )
+                    ),
                     Container(
                         padding: const EdgeInsets.all(20.0),
                         child: TextField(
                           maxLines: null,
+                          controller: _depositETH,
                           keyboardType: TextInputType.number,
+                          onChanged: (String value) async {
+                            setState(() {});
+                          },
                           inputFormatters: [
                             // 1*10^18 weis means 1 ether
                             // TODO The supply of ethereum is flexible so need some provide to update it available range
@@ -77,18 +106,18 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           ),
                         )
                     ),
-                    TextButton(
-                      style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                        padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(right: 20.0))
-                      ),
-                      onPressed: () { },
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: Text('Max $_maxStable USDM'),
-                      )
-                    ),
                     // Generate USD stable coin
+                    TextButton(
+                        style: ButtonStyle(
+                            foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                            padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(right: 20.0))
+                        ),
+                        onPressed: () { },
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: Text('Max $_maxStable USDM'),
+                        )
+                    ),
                     Container(
                         padding: const EdgeInsets.all(20.0),
                         child: TextField(
@@ -102,41 +131,43 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           ),
                         )
                     ),
-                    // Vault changes
-                    Container(
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.only(left: 15.0, top: 20.0),
-                            child: Text(
-                              'Vault changes',
-                              style: Theme.of(context).textTheme.headline6,
-                            ),
-                          )
-                        ]
-                      ),
+                    // Vault changes title
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.only(left: 15.0, top: 20.0),
+                          child: Text(
+                            'Vault changes',
+                            style: Theme.of(context).textTheme.headline6,
+                          ),
+                        )
+                      ]
                     ),
                     // Collateral Locked
                     Row(
                       children: [
                         Container(
-                            padding: const EdgeInsets.only(left: 15.0, top: 20.0),
+                          padding: const EdgeInsets.only(left: 15.0, top: 20.0),
+                          child: Text(
+                            'Collateral Locked (ETH)',
+                            style: Theme.of(context).textTheme.bodyText2,
+                          ),
+                        )
+                      ]
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          width: screenWidth,
+                          padding: const EdgeInsets.only(right: 25.0, top: 5.0),
+                          child: Align(
+                            alignment: Alignment.centerRight,
                             child: Text(
-                              'Collateral Locked',
+                              '${_depositETH.text} -> $_balanceAmountEther',
                               style: Theme.of(context).textTheme.bodyText2,
                             ),
-                          ),
-                        Container(
-                            width: screenWidth*0.62,
-                            padding: const EdgeInsets.only(left: 15.0, top: 20.0),
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                '$_amountEther ETH ->  1.000 ETH',
-                                style: Theme.of(context).textTheme.bodyText2,
-                              ),
-                            )
-                          ),
+                          )
+                        ),
                       ],
                     ),
                     // Collateralization Ratio
@@ -192,7 +223,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           padding: const EdgeInsets.only(left: 15.0, top: 20.0),
                           child: Text(
                             'Vault USDM Debt',
-                            style: Theme.of(context).textTheme.bodyText1,
+                            style: Theme.of(context).textTheme.bodyText2,
                           ),
                         ),
                         Container(
@@ -225,7 +256,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                               alignment: Alignment.centerRight,
                               child: Text(
                                 '0.00 ETH ->  0.00 ETH',
-                                style: Theme.of(context).textTheme.bodyText2,
+                                style: Theme.of(context).textTheme.bodyText1,
                               ),
                             )
                         ),
