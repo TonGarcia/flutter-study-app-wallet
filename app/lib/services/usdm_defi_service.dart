@@ -1,13 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:app/models/user_data.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:app/config.dart';
-import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
-import 'package:web_socket_channel/io.dart';
 
 class USDMDeFiService {
 
@@ -43,7 +39,7 @@ class USDMDeFiService {
     contract = DeployedContract(ContractAbi.fromJson(abiCode, 'USDM'), contractAddress);
 
     // extracting functions and events
-    //transferEvent = contract.event('Transfer');
+    transferEvent = contract.event('Transfer');
     balanceFunction = contract.function('balanceOf');
     calcProvidedRatioFunction = contract.function('calcProvidedRatio');
     estimateLiquidationPriceFunction = contract.function('estimateLiquidationPrice');
@@ -64,7 +60,7 @@ class USDMDeFiService {
           final from = decoded[0] as EthereumAddress;
           final to = decoded[1] as EthereumAddress;
           final value = decoded[2] as BigInt;
-          print('$from sent $value MetaCoins to $to');
+          debugPrint('$from sent $value MetaCoins to $to');
     });
   }
 

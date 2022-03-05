@@ -40,6 +40,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
     num amountEther = await _userWalletData.getBalance();
     setState(() {
       _balanceAmountEther = amountEther;
+      
     });
   }
 
@@ -81,7 +82,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                             padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(right: 20.0))
                         ),
-                        onPressed: () { },
+                        onPressed: () { _depositETH.text = '$_balanceAmountEther'; },
                         child: const Align(
                           alignment: Alignment.topRight,
                           child: Text('Max ETH balance'),
@@ -158,7 +159,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                     Row(
                       children: [
                         Container(
-                          width: screenWidth,
+                          width: screenWidth*0.88,
                           padding: const EdgeInsets.only(right: 25.0, top: 5.0),
                           child: Align(
                             alignment: Alignment.centerRight,
