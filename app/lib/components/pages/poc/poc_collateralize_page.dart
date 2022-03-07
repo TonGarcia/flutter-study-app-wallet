@@ -40,7 +40,8 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
     num amountEther = await _userWalletData.getBalance();
     setState(() {
       _balanceAmountEther = amountEther;
-      
+      // TODO connect to the contract and update max mintable stable
+
     });
   }
 
