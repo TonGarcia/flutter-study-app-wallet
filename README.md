@@ -16,6 +16,7 @@ New Sample Flutter Study App
 
 1. Version: ``` $ flutter --version ```
 1. Missing Packages: ``` $ flutter doctor ```
+1. Auto generate contract integration (update contract.abi.json on app/lib folder): ``` $ cd app && flutter pub run build_runner build ```
 
 # Installing Missing Itens
 
