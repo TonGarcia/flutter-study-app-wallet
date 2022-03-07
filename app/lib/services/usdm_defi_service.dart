@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'package:app/models/user_data.dart';
 import 'package:flutter/cupertino.dart';
@@ -24,7 +25,7 @@ class USDMDeFiService {
   late ContractEvent transferEvent;
   late ContractFunction balanceFunction, calcProvidedRatioFunction,
                         estimateLiquidationPriceFunction, getETHUSDFunction,
-                        getCollateralsEthOfFunction;
+                        getCollateralsEthOfFunction, estimateMaxMintableStable;
 
   USDMDeFiService() {
     httpClient = Client();
@@ -45,6 +46,7 @@ class USDMDeFiService {
     estimateLiquidationPriceFunction = contract.function('estimateLiquidationPrice');
     getCollateralsEthOfFunction = contract.function('getCollateralsEthOf');
     getETHUSDFunction = contract.function('getETHUSD');
+    estimateMaxMintableStable = contract.function('estimateMaxMintableStable');
   }
 
   void subscribeTransferEvent() {
@@ -70,6 +72,20 @@ class USDMDeFiService {
         function: balanceFunction,
         params: [_userWalletData.publicAddress]
     );
+  }
+
+  Future<BigInt> maxMintableStable(BigInt lockedCollateral, BigInt globalPrice) async {
+    final resp = await web3Client.call(
+        contract: contract,
+        function: estimateMaxMintableStable,
+        params: [lockedCollateral, globalPrice]
+    );
+
+    return (resp[0] as BigInt);
+  }
+
+  double formatStable(BigInt amount) {
+    return amount.toDouble() / 100;
   }
 
 }

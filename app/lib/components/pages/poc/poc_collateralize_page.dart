@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:app/config.dart';
 import 'package:app/models/user_data.dart';
 import 'package:app/services/usdm_defi_service.dart';
@@ -19,12 +21,23 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   late Client httpClient;
   late Web3Client ethClient;
   late num _balanceAmountEther = 0;
-  late num _maxStable = 0.00;
+  late double _maxStable = 0.00;
   late UserData _userWalletData;
   late USDMDeFiService deFi;
   final WalletService _walletService = WalletService();
 
   final TextEditingController _depositETH = TextEditingController();
+
+  void setupMaxMint(num collateral) {
+    BigInt defaultGlobalPrice = BigInt.from(0);
+    BigInt possibleLockedCollateral = BigInt.from(collateral * pow(10,18));
+    final maxMintableInt = deFi.maxMintableStable(possibleLockedCollateral, defaultGlobalPrice);
+    maxMintableInt.then((result) {
+      setState(() {
+        _maxStable = deFi.formatStable(result);
+      });
+    });
+  }
 
   @override
   void initState() {
@@ -40,8 +53,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
     num amountEther = await _userWalletData.getBalance();
     setState(() {
       _balanceAmountEther = amountEther;
-      // TODO connect to the contract and update max mintable stable
-
+      setupMaxMint(_balanceAmountEther);
     });
   }
 
@@ -96,7 +108,13 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           controller: _depositETH,
                           keyboardType: TextInputType.number,
                           onChanged: (String value) async {
-                            setState(() {});
+                            setState(() {
+                              if(double.tryParse(_depositETH.text) == null) {
+                                // TODO not numeric, just skip
+                              } else {
+                                setupMaxMint(num.parse(_depositETH.text));
+                              }
+                            });
                           },
                           inputFormatters: [
                             // 1*10^18 weis means 1 ether

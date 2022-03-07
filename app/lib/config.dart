@@ -16,7 +16,7 @@ class Config {
   static const String noSeedPhraseStr = 'No seed wallet yet';
 
   static EthereumAddress usdmAddress() {
-    return EthereumAddress.fromHex('0xf451659CF5688e31a31fC3316efbcC2339A490Fb');
+    return EthereumAddress.fromHex('0xd8b453d37B90Fb78a9DFcFBcFec37321b0093282');
   }
 
   static Future<String> abiUsdm() async {
