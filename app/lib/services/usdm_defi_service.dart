@@ -25,7 +25,8 @@ class USDMDeFiService {
   late ContractEvent transferEvent;
   late ContractFunction balanceFunction, calcProvidedRatioFunction,
                         estimateLiquidationPriceFunction, getETHUSDFunction,
-                        getCollateralsEthOfFunction, estimateMaxMintableStable;
+                        getCollateralsEthOfFunction, estimateMaxMintableStable,
+                        calcProvidedRatio;
 
   USDMDeFiService() {
     httpClient = Client();
@@ -47,6 +48,7 @@ class USDMDeFiService {
     getCollateralsEthOfFunction = contract.function('getCollateralsEthOf');
     getETHUSDFunction = contract.function('getETHUSD');
     estimateMaxMintableStable = contract.function('estimateMaxMintableStable');
+    calcProvidedRatio = contract.function('calcProvidedRatio');
   }
 
   void subscribeTransferEvent() {
@@ -79,6 +81,22 @@ class USDMDeFiService {
         contract: contract,
         function: estimateMaxMintableStable,
         params: [lockedCollateral, globalPrice]
+    );
+
+    return (resp[0] as BigInt);
+  }
+
+  Future<BigInt> providedRatio(BigInt collateral, BigInt globalPrice, BigInt expectedStable) async {
+    final zero = BigInt.from(0);
+
+    if(collateral == zero || expectedStable == zero) {
+      return zero;
+    }
+
+    final resp = await web3Client.call(
+        contract: contract,
+        function: calcProvidedRatio,
+        params: [collateral, globalPrice, expectedStable]
     );
 
     return (resp[0] as BigInt);

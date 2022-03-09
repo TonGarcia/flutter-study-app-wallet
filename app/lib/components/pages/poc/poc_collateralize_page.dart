@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:app/components/widgets/alert.dart';
 import 'package:app/config.dart';
 import 'package:app/models/user_data.dart';
 import 'package:app/services/usdm_defi_service.dart';
@@ -20,13 +21,35 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
 
   late Client httpClient;
   late Web3Client ethClient;
+  late num _availableToGenerate = 0.00;
+  late num _calcCollateralizationRatio = 0.00;
+  late num _maxCollateralizationRatio = 0.00;
+  late num _calcLiquidationPrice = 0.00;
+  late num _maxLiquidationPrice = 0.00;
   late num _balanceAmountEther = 0;
+  late num _expectedStable = 0.00;
   late double _maxStable = 0.00;
   late UserData _userWalletData;
   late USDMDeFiService deFi;
   final WalletService _walletService = WalletService();
 
   final TextEditingController _depositETH = TextEditingController();
+  final TextEditingController _stableToGenerate = TextEditingController();
+
+  void setupRatios() {
+    setState(() {
+      _expectedStable = double.parse(_stableToGenerate.text);
+      _availableToGenerate = _maxStable - _expectedStable;
+      BigInt defaultGlobalPrice = BigInt.from(0);
+      final collateral = BigInt.from(double.parse(_depositETH.text) * pow(10,18));
+      Future<BigInt> providedRatio = deFi.providedRatio(collateral, defaultGlobalPrice, BigInt.from(_expectedStable*100));
+      providedRatio.then((result){
+        setState(() {
+          _calcCollateralizationRatio = ((result).toDouble() / 100);
+        });
+      });
+    });
+  }
 
   void setupMaxMint(num collateral) {
     BigInt defaultGlobalPrice = BigInt.from(0);
@@ -35,6 +58,27 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
     maxMintableInt.then((result) {
       setState(() {
         _maxStable = deFi.formatStable(result);
+        deFi.providedRatio(possibleLockedCollateral, defaultGlobalPrice, BigInt.from(_expectedStable*100));
+
+        Future<BigInt> providedRatio = deFi.providedRatio(possibleLockedCollateral,
+                                                          defaultGlobalPrice,
+                                                          BigInt.from(_maxStable*100));
+
+        providedRatio.then((result){
+          setState(() {
+            _maxCollateralizationRatio = ((result).toDouble() / 100);
+          });
+        });
+
+        /*
+        if(generatedStable >= minStable) {
+          // ... TODO collateralization ratio  ...
+        } else {
+          List<Widget> body = <Widget>[
+            Text('The minimal required stablecoin to be generated is $minStable.');
+          ];
+          Alert.show(context, 'Minimal stable required', body);
+        }*/
       });
     });
   }
@@ -95,7 +139,14 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                             padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(right: 20.0))
                         ),
-                        onPressed: () { _depositETH.text = '$_balanceAmountEther'; },
+                        onPressed: () {
+                          _depositETH.text = '$_balanceAmountEther';
+                          setState(() {
+                            if(double.tryParse(_depositETH.text) != null) {
+                              setupMaxMint(num.parse(_depositETH.text));
+                            }
+                          });
+                        },
                         child: const Align(
                           alignment: Alignment.topRight,
                           child: Text('Max ETH balance'),
@@ -109,9 +160,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           keyboardType: TextInputType.number,
                           onChanged: (String value) async {
                             setState(() {
-                              if(double.tryParse(_depositETH.text) == null) {
-                                // TODO not numeric, just skip
-                              } else {
+                              if(double.tryParse(_depositETH.text) != null) {
                                 setupMaxMint(num.parse(_depositETH.text));
                               }
                             });
@@ -132,7 +181,13 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                             padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(right: 20.0))
                         ),
-                        onPressed: () { },
+                        onPressed: () {
+                          _stableToGenerate.text = '$_maxStable';
+                          setState(() {
+                            _expectedStable = _maxStable;
+                            setupRatios();
+                          });
+                        },
                         child: Align(
                           alignment: Alignment.topRight,
                           child: Text('Max $_maxStable USDM'),
@@ -142,7 +197,15 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         padding: const EdgeInsets.all(20.0),
                         child: TextField(
                           maxLines: null,
+                          controller: _stableToGenerate,
                           keyboardType: TextInputType.number,
+                          onChanged: (String value) async {
+                            setState(() {
+                              if(double.tryParse(_stableToGenerate.text) != null) {
+                                setupRatios();
+                              }
+                            });
+                          },
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^[\d+]{0,10}\.?[\d*]{0,2}')),
                           ],
@@ -206,7 +269,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Text(
-                                '0.00% ->  X%',
+                                '$_calcCollateralizationRatio% ->  $_maxCollateralizationRatio%',
                                 style: Theme.of(context).textTheme.bodyText2,
                               ),
                             )
@@ -229,7 +292,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Text(
-                                '\$0.00 ->  \$0.00',
+                                '\$$_calcLiquidationPrice ->  \$$_maxLiquidationPrice',
                                 style: Theme.of(context).textTheme.bodyText2,
                               ),
                             )
@@ -252,7 +315,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Text(
-                                '0.00 USDM ->  0.00 USDM',
+                                '$_expectedStable USDM ->  $_maxStable USDM',
                                 style: Theme.of(context).textTheme.bodyText2,
                               ),
                             )
@@ -298,7 +361,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Text(
-                                '0.00 USDM ->  0.00 USDM',
+                                '$_availableToGenerate USDM ->  $_maxStable USDM',
                                 style: Theme.of(context).textTheme.bodyText2,
                               ),
                             )
