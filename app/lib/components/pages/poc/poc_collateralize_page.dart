@@ -70,7 +70,8 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
         });
       });
 
-      deFi.getPriceETHUSD(collateral).then((collateralUSD) {
+      Future<BigInt> priceETHUSD = deFi.getPriceETHUSD(collateral);
+      priceETHUSD.then((collateralUSD) {
         final vaultDebt = BigInt.from(_expectedStable*100);
         Future<BigInt> liquidationPrice = deFi.liquidationPrice(vaultDebt, defaultGlobalPrice, collateralUSD);
         liquidationPrice.then((result) {
