@@ -24,6 +24,8 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   late num _availableToGenerate = 0.00;
   late num _calcCollateralizationRatio = 0.00;
   late num _maxCollateralizationRatio = 0.00;
+  late num _maxWithdraw = 0.00;
+  late num _remainWithdraw = 0.00;
   late num _calcLiquidationPrice = 0.00;
   late num _maxLiquidationPrice = 0.00;
   late num _balanceAmountEther = 0;
@@ -37,8 +39,25 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   final TextEditingController _depositETH = TextEditingController();
   final TextEditingController _stableToGenerate = TextEditingController();
 
+  void calcWithdraw() {
+    if(_depositETH.text.isNotEmpty) {
+      _maxWithdraw = double.parse(_depositETH.text);
+      if(_stableToGenerate.text.isNotEmpty) {
+        final vaultDebt = double.parse(_stableToGenerate.text);
+        final collateral = BigInt.from(_maxWithdraw * pow(10,18));
+        deFi.getPriceETHUSD(collateral).then((collateralUSD) {
+          final collateralUSDF = (collateralUSD).toDouble() / 100;
+          final availableWithdraw = collateralUSDF - (vaultDebt*1.7);
+          final ratio = availableWithdraw/collateralUSDF;
+          _remainWithdraw = _maxWithdraw * ratio;
+        });
+      }
+    }
+  }
+
   void setupRatios() {
     setState(() {
+      calcWithdraw();
       _expectedStable = double.parse(_stableToGenerate.text);
       _availableToGenerate = _maxStable - _expectedStable;
       _availableToGenerateStr = _availableToGenerate.toStringAsFixed(2);
@@ -76,6 +95,8 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                                                           defaultGlobalPrice,
                                                           BigInt.from(_maxStable*100));
 
+        calcWithdraw();
+
         providedRatio.then((result){
           setState(() {
             _maxCollateralizationRatio = ((result).toDouble() / 100);
@@ -98,24 +119,6 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
             });
           });
         });
-
-        // TODO ILTON
-        // Future<BigInt> liquidationPrice = deFi.liquidationPrice(BigInt.from(_maxStable*100), defaultGlobalPrice);
-        // liquidationPrice.then((result) {
-        //   setState(() {
-        //     _maxLiquidationPrice = ((result).toDouble() / 100);
-        //   });
-        // });
-
-        /*
-        if(generatedStable >= minStable) {
-          // ... TODO collateralization ratio  ...
-        } else {
-          List<Widget> body = <Widget>[
-            Text('The minimal required stablecoin to be generated is $minStable.');
-          ];
-          Alert.show(context, 'Minimal stable required', body);
-        }*/
       });
     });
   }
@@ -375,7 +378,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Text(
-                                '0.00 ETH ->  0.00 ETH',
+                                '$_remainWithdraw ETH ->  $_maxWithdraw ETH',
                                 style: Theme.of(context).textTheme.bodyText1,
                               ),
                             )
