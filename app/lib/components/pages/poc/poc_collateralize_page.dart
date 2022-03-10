@@ -31,6 +31,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   late double _maxStable = 0.00;
   late UserData _userWalletData;
   late USDMDeFiService deFi;
+  late String _availableToGenerateStr = '0.00';
   final WalletService _walletService = WalletService();
 
   final TextEditingController _depositETH = TextEditingController();
@@ -40,12 +41,23 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
     setState(() {
       _expectedStable = double.parse(_stableToGenerate.text);
       _availableToGenerate = _maxStable - _expectedStable;
+      _availableToGenerateStr = _availableToGenerate.toStringAsFixed(2);
       BigInt defaultGlobalPrice = BigInt.from(0);
       final collateral = BigInt.from(double.parse(_depositETH.text) * pow(10,18));
       Future<BigInt> providedRatio = deFi.providedRatio(collateral, defaultGlobalPrice, BigInt.from(_expectedStable*100));
       providedRatio.then((result){
         setState(() {
           _calcCollateralizationRatio = ((result).toDouble() / 100);
+        });
+      });
+
+      deFi.getPriceETHUSD(collateral).then((collateralUSD) {
+        final vaultDebt = BigInt.from(_expectedStable*100);
+        Future<BigInt> liquidationPrice = deFi.liquidationPrice(vaultDebt, defaultGlobalPrice, collateralUSD);
+        liquidationPrice.then((result) {
+          setState(() {
+            _calcLiquidationPrice = ((result).toDouble() / 100);
+          });
         });
       });
     });
@@ -69,6 +81,31 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
             _maxCollateralizationRatio = ((result).toDouble() / 100);
           });
         });
+
+        final collateral = BigInt.from(_balanceAmountEther * pow(10,18));
+        providedRatio.then((result){
+          setState(() {
+            _calcCollateralizationRatio = ((result).toDouble() / 100);
+          });
+        });
+
+        deFi.getPriceETHUSD(collateral).then((collateralUSD) {
+          final vaultDebt = BigInt.from(_maxStable*100);
+          Future<BigInt> liquidationPrice = deFi.liquidationPrice(vaultDebt, defaultGlobalPrice, collateralUSD);
+          liquidationPrice.then((result) {
+            setState(() {
+              _maxLiquidationPrice = ((result).toDouble() / 100);
+            });
+          });
+        });
+
+        // TODO ILTON
+        // Future<BigInt> liquidationPrice = deFi.liquidationPrice(BigInt.from(_maxStable*100), defaultGlobalPrice);
+        // liquidationPrice.then((result) {
+        //   setState(() {
+        //     _maxLiquidationPrice = ((result).toDouble() / 100);
+        //   });
+        // });
 
         /*
         if(generatedStable >= minStable) {
@@ -361,7 +398,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Text(
-                                '$_availableToGenerate USDM ->  $_maxStable USDM',
+                                '$_availableToGenerateStr USDM ->  $_maxStable USDM',
                                 style: Theme.of(context).textTheme.bodyText2,
                               ),
                             )

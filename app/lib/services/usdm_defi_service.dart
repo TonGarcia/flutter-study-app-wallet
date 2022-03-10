@@ -86,20 +86,41 @@ class USDMDeFiService {
     return (resp[0] as BigInt);
   }
 
-  Future<BigInt> providedRatio(BigInt collateral, BigInt globalPrice, BigInt expectedStable) async {
+  // vaultDebt = how much generated stable coins
+  Future<BigInt> providedRatio(BigInt collateral, BigInt globalPrice, BigInt vaultDebt) async {
     final zero = BigInt.from(0);
 
-    if(collateral == zero || expectedStable == zero) {
+    if(collateral == zero || vaultDebt == zero) {
       return zero;
     }
 
     final resp = await web3Client.call(
         contract: contract,
         function: calcProvidedRatio,
-        params: [collateral, globalPrice, expectedStable]
+        params: [collateral, globalPrice, vaultDebt]
     );
 
     return (resp[0] as BigInt);
+  }
+
+  Future<BigInt> liquidationPrice(BigInt vaultDebt, BigInt currentPrice, BigInt collateralUSD) async {
+    final resp = await web3Client.call(
+        contract: contract,
+        function: estimateLiquidationPriceFunction,
+        params: [vaultDebt, currentPrice, collateralUSD]
+    );
+
+    return (resp[0] as BigInt);
+  }
+
+  Future<BigInt> getPriceETHUSD(BigInt amount) async {
+    final resp = await web3Client.call(
+        contract: contract,
+        function: getETHUSDFunction,
+        params: [amount]
+    );
+
+    return (resp[2] as BigInt);
   }
 
   double formatStable(BigInt amount) {
