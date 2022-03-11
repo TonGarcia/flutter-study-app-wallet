@@ -29,6 +29,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   late num _calcLiquidationPrice = 0.00;
   late num _maxLiquidationPrice = 0.00;
   late num _balanceAmountEther = 0;
+  late num _gasFree = 0.00;
   late num _expectedStable = 0.00;
   late double _maxStable = 0.00;
   late UserData _userWalletData;
@@ -38,6 +39,11 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
 
   final TextEditingController _depositETH = TextEditingController();
   final TextEditingController _stableToGenerate = TextEditingController();
+
+  void openCollateral() {
+    BigInt collateralETH = BigInt.from(double.parse(_depositETH.text)*pow(10,18));
+    // deFi.openCollateralPosition(collateralETH, vaultDebt)
+  }
 
   void calcWithdraw() {
     if(_depositETH.text.isNotEmpty) {
@@ -145,6 +151,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    //_gasFree =  
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: SingleChildScrollView(
@@ -159,7 +166,29 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           padding: const EdgeInsets.only(left: 20.0, top: 10.0),
                           child:
                           Text(
-                            'Balance: $_balanceAmountEther',
+                            'Estimated gas fee: $_balanceAmountEther',
+                            style: Theme.of(context).textTheme.headline6,
+                          ),
+                        ),
+                        const SizedBox(width: 10.0),
+                        IconButton(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          onPressed: (){
+                            updateBalance();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          color: Colors.blue,
+                        )
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          width: screenWidth*0.8,
+                          padding: const EdgeInsets.only(left: 20.0, top: 10.0),
+                          child:
+                          Text(
+                            'Balance (ETH): $_balanceAmountEther',
                             style: Theme.of(context).textTheme.headline6,
                           ),
                         ),
@@ -435,7 +464,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                                 textStyle: const TextStyle(fontSize: 20),
                               ),
                               onPressed: () {
-                                //_userWalletData.loadWallet(_seedPhraseController.text);
+                                openCollateral();
                               },
                               icon: const Icon(Icons.star),
                               label: const Text('Open collateral position'),

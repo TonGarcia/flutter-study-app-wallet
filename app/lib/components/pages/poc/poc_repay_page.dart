@@ -14,6 +14,7 @@ class PocRepayPage extends StatefulWidget {
 }
 
 class _PocRepayPageState extends State<PocRepayPage> {
+  late num _balanceUSDM = 0.00;
   late Client httpClient;
   late Web3Client ethClient;
   late UserData _userWalletData;
@@ -28,12 +29,46 @@ class _PocRepayPageState extends State<PocRepayPage> {
     _userWalletData = UserData(autoGenerateWallet);
   }
 
+  Future<void> updateBalance() async {
+
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    return const SingleChildScrollView(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: SingleChildScrollView(
         reverse: true,
-        child: Center()
+        child: Center(
+          child: Column(
+              children: <Widget>[
+                Row(
+                    children: [
+                      Container(
+                        width: screenWidth*0.8,
+                        padding: const EdgeInsets.only(left: 20.0, top: 10.0),
+                        child:
+                        Text(
+                          'Balance (USDM): US\$ $_balanceUSDM',
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                      ),
+                      const SizedBox(width: 10.0),
+                      IconButton(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        onPressed: (){
+                          updateBalance();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        color: Colors.blue,
+                      )
+                    ]
+                )
+              ]
+          )
+        )
+      )
     );
   }
 

@@ -26,7 +26,7 @@ class USDMDeFiService {
   late ContractFunction balanceFunction, calcProvidedRatioFunction,
                         estimateLiquidationPriceFunction, getETHUSDFunction,
                         getCollateralsEthOfFunction, estimateMaxMintableStable,
-                        calcProvidedRatio;
+                        collateralizeFunction;
 
   USDMDeFiService() {
     httpClient = Client();
@@ -48,7 +48,7 @@ class USDMDeFiService {
     getCollateralsEthOfFunction = contract.function('getCollateralsEthOf');
     getETHUSDFunction = contract.function('getETHUSD');
     estimateMaxMintableStable = contract.function('estimateMaxMintableStable');
-    calcProvidedRatio = contract.function('calcProvidedRatio');
+    collateralizeFunction = contract.function('collaterallize'); // TODO update it after update smart contract
   }
 
   void subscribeTransferEvent() {
@@ -64,7 +64,7 @@ class USDMDeFiService {
           final from = decoded[0] as EthereumAddress;
           final to = decoded[1] as EthereumAddress;
           final value = decoded[2] as BigInt;
-          debugPrint('$from sent $value MetaCoins to $to');
+          debugPrint('$from sent $value Coin to $to');
     });
   }
 
@@ -96,7 +96,7 @@ class USDMDeFiService {
 
     final resp = await web3Client.call(
         contract: contract,
-        function: calcProvidedRatio,
+        function: calcProvidedRatioFunction,
         params: [collateral, globalPrice, vaultDebt]
     );
 
@@ -122,6 +122,17 @@ class USDMDeFiService {
 
     return (resp[2] as BigInt);
   }
+
+  // Future<String> openCollateralPosition(BigInt collateralETH, BigInt vaultDebt) async {
+  //
+  //
+  //   // TODO
+  //
+  //   // final params = [vaultDebt];
+  //   // return write(credentials, transaction, function, params);
+  //   //
+  //   // return (resp[2] as BigInt);
+  // }
 
   double formatStable(BigInt amount) {
     return amount.toDouble() / 100;
