@@ -134,6 +134,22 @@ class USDMDeFiService {
   //   // return (resp[2] as BigInt);
   // }
 
+  Future<BigInt> estimateGasFee({EthereumAddress? sender, EthereumAddress? to, required List<dynamic> params,
+                                EtherAmount? collateral, ContractFunction? contractFunction }) async {
+
+    // 1 GAS = 1 Gwei = 0,000000001
+    // BlockInformation blockInfo = await web3Client.getBlockInformation(blockNumber: 'latest', isContainFullObj: true);
+    // EtherAmount lastGasFee = blockInfo.baseFeePerGas!;
+
+    try {
+      final transaction = Transaction.callContract(from: sender, contract: contract, function: contractFunction!, parameters: params, value: collateral);
+      return await web3Client.estimateGas(sender: sender, to: transaction.to, value: transaction.value, data: transaction.data);
+    } on Exception catch (_) {
+      throw Exception(_);
+    }
+
+  }
+
   double formatStable(BigInt amount) {
     return amount.toDouble() / 100;
   }

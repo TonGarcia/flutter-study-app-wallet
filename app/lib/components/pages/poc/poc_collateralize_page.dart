@@ -29,7 +29,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   late num _calcLiquidationPrice = 0.00;
   late num _maxLiquidationPrice = 0.00;
   late num _balanceAmountEther = 0;
-  late num _gasFree = 0.00;
+  late num _estimatedGasFee = 0.00;
   late num _expectedStable = 0.00;
   late double _maxStable = 0.00;
   late UserData _userWalletData;
@@ -63,12 +63,16 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
 
   void setupRatios() {
     setState(() {
+
       calcWithdraw();
       _expectedStable = double.parse(_stableToGenerate.text);
       _availableToGenerate = _maxStable - _expectedStable;
       _availableToGenerateStr = _availableToGenerate.toStringAsFixed(2);
       BigInt defaultGlobalPrice = BigInt.from(0);
+
+      if(_depositETH.text.isEmpty) return;
       final collateral = BigInt.from(double.parse(_depositETH.text) * pow(10,18));
+
       Future<BigInt> providedRatio = deFi.providedRatio(collateral, defaultGlobalPrice, BigInt.from(_expectedStable*100));
       providedRatio.then((result){
         setState(() {
@@ -86,12 +90,29 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
           });
         });
       });
+
+      EthereumAddress to = deFi.contractAddress;
+      EthereumAddress sender = EthereumAddress.fromHex(_userWalletData.publicAddress);
+      EtherAmount providedCollateral = EtherAmount.inWei(collateral);
+      BigInt vaultDebit = BigInt.from(_expectedStable*100);
+
+      deFi.estimateGasFee(sender: sender, to: to, contractFunction: deFi.collateralizeFunction,
+          collateral: providedCollateral, params: [vaultDebit]).then((estimatedGasFree) {
+        setState(() {
+          _estimatedGasFee = estimatedGasFree as num;
+          //_estimatedGasFee = (_walletService.estimateGasFee(sender, to, amount) as double) / pow(10,18);
+        });
+      }).catchError((handleError) {
+        Alert.show(context, "Contract returned an exception", <Widget>[Text(handleError.toString())]);
+      });
+
     });
   }
 
   void setupMaxMint(num collateral) {
     BigInt defaultGlobalPrice = BigInt.from(0);
     BigInt possibleLockedCollateral = BigInt.from(collateral * pow(10,18));
+
     final maxMintableInt = deFi.maxMintableStable(possibleLockedCollateral, defaultGlobalPrice);
     maxMintableInt.then((result) {
       setState(() {
@@ -151,7 +172,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    //_gasFree =  
+    //_gasFree =
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: SingleChildScrollView(
@@ -159,28 +180,6 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
             child: Center(
               child: Column(
                   children: <Widget>[
-                    Row(
-                      children: [
-                        Container(
-                          width: screenWidth*0.8,
-                          padding: const EdgeInsets.only(left: 20.0, top: 10.0),
-                          child:
-                          Text(
-                            'Estimated gas fee: $_balanceAmountEther',
-                            style: Theme.of(context).textTheme.headline6,
-                          ),
-                        ),
-                        const SizedBox(width: 10.0),
-                        IconButton(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          onPressed: (){
-                            updateBalance();
-                          },
-                          icon: const Icon(Icons.refresh),
-                          color: Colors.blue,
-                        )
-                      ],
-                    ),
                     Row(
                       children: [
                         Container(
@@ -438,6 +437,47 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         ),
                       ],
                     ),
+                    TextButton(
+                        style: ButtonStyle(
+                            foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                            padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(top: 35.0, right: 20.0))
+                        ),
+                        onPressed: () {
+                          // TODO set gas fee to the input
+                          /*
+                          _stableToGenerate.text = '$_maxStable';
+                          setState(() {
+                            _expectedStable = _maxStable;
+                            setupRatios();
+                          });
+                          */
+                        },
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: Text('Estimated gas fee $_estimatedGasFee Gwei'),
+                        )
+                    ),
+                    Container(
+                        padding: const EdgeInsets.all(20.0),
+                        child: TextField(
+                          maxLines: null,
+                          // controller: _stableToGenerate,
+                          keyboardType: TextInputType.number,
+                          onChanged: (String value) async {
+                            setState(() {
+                              // if(double.tryParse(_stableToGenerate.text) != null) {
+                              //   setupRatios();
+                              // }
+                            });
+                          },
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^[\d+]{0,10}\.?[\d*]{0,18}')),
+                          ],
+                          decoration: const InputDecoration(
+                            hintText: 'Consumed gas fee in gweis',
+                          ),
+                        )
+                    ),
                     Container(
                       margin: const EdgeInsets.only(top: 25.0),
                       child: ClipRRect(
@@ -472,7 +512,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           ],
                         ),
                       ),
-                    )
+                    ),
                   ]
               ),
             )

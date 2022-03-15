@@ -22,7 +22,15 @@ class Alert {
               child: ListBody(
                 children: body
               )
-            )
+            ),
+            actions: [
+              MaterialButton(
+                  child: const Text("OK"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }
+              )
+            ]
           );
         }
     );

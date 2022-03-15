@@ -1,5 +1,6 @@
 import 'package:app/config.dart';
 import 'package:ed25519_hd_key/ed25519_hd_key.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:hex/hex.dart';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:web3dart/web3dart.dart';
@@ -108,9 +109,4 @@ class WalletService implements WalletAddressService {
     }
   }
 
-  // @override
-  // Future<List> query(String functionName, List args) {
-  //   // TODO: implement query over smart contract
-  //   throw UnimplementedError();
-  // }
 }
