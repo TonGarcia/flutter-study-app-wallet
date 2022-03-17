@@ -37,19 +37,20 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   late String _availableToGenerateStr = '0.00';
   final WalletService _walletService = WalletService();
 
-  final TextEditingController _depositETH = TextEditingController();
-  final TextEditingController _stableToGenerate = TextEditingController();
+  final TextEditingController _gasFeeCtrl = TextEditingController();
+  final TextEditingController _depositETHCtrl = TextEditingController();
+  final TextEditingController _stableToGenerateCtrl = TextEditingController();
 
   void openCollateral() {
-    BigInt collateralETH = BigInt.from(double.parse(_depositETH.text)*pow(10,18));
+    BigInt collateralETH = BigInt.from(double.parse(_depositETHCtrl.text)*pow(10,18));
     // deFi.openCollateralPosition(collateralETH, vaultDebt)
   }
 
   void calcWithdraw() {
-    if(_depositETH.text.isNotEmpty) {
-      _maxWithdraw = double.parse(_depositETH.text);
-      if(_stableToGenerate.text.isNotEmpty) {
-        final vaultDebt = double.parse(_stableToGenerate.text);
+    if(_depositETHCtrl.text.isNotEmpty) {
+      _maxWithdraw = double.parse(_depositETHCtrl.text);
+      if(_stableToGenerateCtrl.text.isNotEmpty) {
+        final vaultDebt = double.parse(_stableToGenerateCtrl.text);
         final collateral = BigInt.from(_maxWithdraw * pow(10,18));
         deFi.getPriceETHUSD(collateral).then((collateralUSD) {
           final collateralUSDF = (collateralUSD).toDouble() / 100;
@@ -65,13 +66,13 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
     setState(() {
 
       calcWithdraw();
-      _expectedStable = double.parse(_stableToGenerate.text);
+      _expectedStable = double.parse(_stableToGenerateCtrl.text);
       _availableToGenerate = _maxStable - _expectedStable;
       _availableToGenerateStr = _availableToGenerate.toStringAsFixed(2);
       BigInt defaultGlobalPrice = BigInt.from(0);
 
-      if(_depositETH.text.isEmpty) return;
-      final collateral = BigInt.from(double.parse(_depositETH.text) * pow(10,18));
+      if(_depositETHCtrl.text.isEmpty) return;
+      final collateral = BigInt.from(double.parse(_depositETHCtrl.text) * pow(10,18));
 
       Future<BigInt> providedRatio = deFi.providedRatio(collateral, defaultGlobalPrice, BigInt.from(_expectedStable*100));
       providedRatio.then((result){
@@ -99,8 +100,8 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
       deFi.estimateGasFee(sender: sender, to: to, contractFunction: deFi.collateralizeFunction,
           collateral: providedCollateral, params: [vaultDebit]).then((estimatedGasFree) {
         setState(() {
-          _estimatedGasFee = estimatedGasFree as num;
-          //_estimatedGasFee = (_walletService.estimateGasFee(sender, to, amount) as double) / pow(10,18);
+          final estimatedGasInWeis = estimatedGasFree.toDouble() * pow(10,9);
+          _estimatedGasFee = estimatedGasInWeis/pow(10,18);
         });
       }).catchError((handleError) {
         Alert.show(context, "Contract returned an exception", <Widget>[Text(handleError.toString())]);
@@ -209,10 +210,10 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(right: 20.0))
                         ),
                         onPressed: () {
-                          _depositETH.text = '$_balanceAmountEther';
+                          _depositETHCtrl.text = '$_balanceAmountEther';
                           setState(() {
-                            if(double.tryParse(_depositETH.text) != null) {
-                              setupMaxMint(num.parse(_depositETH.text));
+                            if(double.tryParse(_depositETHCtrl.text) != null) {
+                              setupMaxMint(num.parse(_depositETHCtrl.text));
                             }
                           });
                         },
@@ -225,12 +226,12 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         padding: const EdgeInsets.all(20.0),
                         child: TextField(
                           maxLines: null,
-                          controller: _depositETH,
+                          controller: _depositETHCtrl,
                           keyboardType: TextInputType.number,
                           onChanged: (String value) async {
                             setState(() {
-                              if(double.tryParse(_depositETH.text) != null) {
-                                setupMaxMint(num.parse(_depositETH.text));
+                              if(double.tryParse(_depositETHCtrl.text) != null) {
+                                setupMaxMint(num.parse(_depositETHCtrl.text));
                               }
                             });
                           },
@@ -251,7 +252,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(right: 20.0))
                         ),
                         onPressed: () {
-                          _stableToGenerate.text = '$_maxStable';
+                          _stableToGenerateCtrl.text = '$_maxStable';
                           setState(() {
                             _expectedStable = _maxStable;
                             setupRatios();
@@ -266,11 +267,11 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         padding: const EdgeInsets.all(20.0),
                         child: TextField(
                           maxLines: null,
-                          controller: _stableToGenerate,
+                          controller: _stableToGenerateCtrl,
                           keyboardType: TextInputType.number,
                           onChanged: (String value) async {
                             setState(() {
-                              if(double.tryParse(_stableToGenerate.text) != null) {
+                              if(double.tryParse(_stableToGenerateCtrl.text) != null) {
                                 setupRatios();
                               }
                             });
@@ -284,6 +285,42 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         )
                     ),
                     // Vault changes title
+                    TextButton(
+                        style: ButtonStyle(
+                            foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                            padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(top: 35.0, right: 20.0))
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _gasFeeCtrl.text = _estimatedGasFee.toString();
+                          });
+                        },
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: Text('Estimated gas fee $_estimatedGasFee'),
+                        )
+                    ),
+                    Container(
+                        padding: const EdgeInsets.all(20.0),
+                        child: TextField(
+                          maxLines: null,
+                          controller: _gasFeeCtrl,
+                          keyboardType: TextInputType.number,
+                          onChanged: (String value) async {
+                            setState(() {
+                              final gasFee = double.parse(_gasFeeCtrl.text);
+                              final collateral = double.parse(_depositETHCtrl.text);
+                              _depositETHCtrl.text = (collateral - gasFee).toString();
+                            });
+                          },
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^[\d+]{0,10}\.?[\d*]{0,18}')),
+                          ],
+                          decoration: const InputDecoration(
+                            hintText: 'Consumed gas fee in gweis',
+                          ),
+                        )
+                    ),
                     Row(
                       children: [
                         Container(
@@ -315,7 +352,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              '${_depositETH.text} -> $_balanceAmountEther',
+                              '${_depositETHCtrl.text} -> $_balanceAmountEther',
                               style: Theme.of(context).textTheme.bodyText2,
                             ),
                           )
@@ -436,47 +473,6 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                             )
                         ),
                       ],
-                    ),
-                    TextButton(
-                        style: ButtonStyle(
-                            foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                            padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.only(top: 35.0, right: 20.0))
-                        ),
-                        onPressed: () {
-                          // TODO set gas fee to the input
-                          /*
-                          _stableToGenerate.text = '$_maxStable';
-                          setState(() {
-                            _expectedStable = _maxStable;
-                            setupRatios();
-                          });
-                          */
-                        },
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: Text('Estimated gas fee $_estimatedGasFee Gwei'),
-                        )
-                    ),
-                    Container(
-                        padding: const EdgeInsets.all(20.0),
-                        child: TextField(
-                          maxLines: null,
-                          // controller: _stableToGenerate,
-                          keyboardType: TextInputType.number,
-                          onChanged: (String value) async {
-                            setState(() {
-                              // if(double.tryParse(_stableToGenerate.text) != null) {
-                              //   setupRatios();
-                              // }
-                            });
-                          },
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^[\d+]{0,10}\.?[\d*]{0,18}')),
-                          ],
-                          decoration: const InputDecoration(
-                            hintText: 'Consumed gas fee in gweis',
-                          ),
-                        )
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 25.0),
