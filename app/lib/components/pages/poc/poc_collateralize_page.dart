@@ -42,8 +42,31 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
   final TextEditingController _stableToGenerateCtrl = TextEditingController();
 
   void openCollateral() {
-    BigInt collateralETH = BigInt.from(double.parse(_depositETHCtrl.text)*pow(10,18));
-    // deFi.openCollateralPosition(collateralETH, vaultDebt)
+    _expectedStable = double.parse(_stableToGenerateCtrl.text);
+    final vaultDebt = BigInt.from(_expectedStable*100);
+    BigInt collateral = BigInt.from(double.parse(_depositETHCtrl.text)*pow(10,18));
+    EthereumAddress sender = EthereumAddress.fromHex(_userWalletData.publicAddress);
+    EtherAmount providedCollateral = EtherAmount.inWei(collateral);
+    EtherAmount maxGasFee = EtherAmount.inWei(BigInt.from(_estimatedGasFee * pow(10,18)));
+    Credentials credentials = _userWalletData.getCredentials();
+    const chainId = Config.ethereumChainId;
+    Future<String> resp = deFi.openCollateralPosition(sender, providedCollateral, vaultDebt, maxGasFee, credentials, chainId);
+    resp.then((result){
+      Alert.show(context, "Transaction created", <Widget>[Text("Your request was registered on the transaction: $result")]);
+    }).catchError((handleError) {
+      Alert.show(context, "Contract returned an exception", <Widget>[Text(handleError.toString())]);
+    });
+  }
+
+  void updateCollateralLessFess() {
+    setState(() {
+      if(_gasFeeCtrl.text.isNotEmpty && _depositETHCtrl.text.isNotEmpty) {
+        final gasFee = double.parse(_gasFeeCtrl.text);
+        final collateral = double.parse(_depositETHCtrl.text);
+        _depositETHCtrl.text = (collateral - gasFee).toString();
+        setupMaxMint(double.parse(_depositETHCtrl.text));
+      }
+    });
   }
 
   void calcWithdraw() {
@@ -293,6 +316,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                         onPressed: () {
                           setState(() {
                             _gasFeeCtrl.text = _estimatedGasFee.toString();
+                            updateCollateralLessFess();
                           });
                         },
                         child: Align(
@@ -307,11 +331,7 @@ class _PocCollateralizePageState extends State<PocCollateralizePage> {
                           controller: _gasFeeCtrl,
                           keyboardType: TextInputType.number,
                           onChanged: (String value) async {
-                            setState(() {
-                              final gasFee = double.parse(_gasFeeCtrl.text);
-                              final collateral = double.parse(_depositETHCtrl.text);
-                              _depositETHCtrl.text = (collateral - gasFee).toString();
-                            });
+                            updateCollateralLessFess();
                           },
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^[\d+]{0,10}\.?[\d*]{0,18}')),

@@ -69,10 +69,11 @@ class USDMDeFiService {
   }
 
   Future<List> getBalance() {
+    final userWalletAddress = EthereumAddress.fromHex(_userWalletData.publicAddress);
     return web3Client.call(
         contract: contract,
         function: balanceFunction,
-        params: [_userWalletData.publicAddress]
+        params: [userWalletAddress]
     );
   }
 
@@ -123,16 +124,18 @@ class USDMDeFiService {
     return (resp[2] as BigInt);
   }
 
-  // Future<String> openCollateralPosition(BigInt collateralETH, BigInt vaultDebt) async {
-  //
-  //
-  //   // TODO
-  //
-  //   // final params = [vaultDebt];
-  //   // return write(credentials, transaction, function, params);
-  //   //
-  //   // return (resp[2] as BigInt);
-  // }
+  Future<String> openCollateralPosition(EthereumAddress sender, EtherAmount collateralETH,
+                                        BigInt vaultDebt, EtherAmount maxGasFee,
+                                        Credentials credentials, int chainId) async {
+
+    final transaction = Transaction.callContract(from: sender, contract: contract,
+                                                  function: collateralizeFunction,
+                                                  parameters: [vaultDebt],
+                                                  value: collateralETH);
+
+    return web3Client.sendTransaction(credentials, transaction, chainId: chainId);
+
+  }
 
   Future<BigInt> estimateGasFee({EthereumAddress? sender, EthereumAddress? to, required List<dynamic> params,
                                 EtherAmount? collateral, ContractFunction? contractFunction }) async {
@@ -142,7 +145,8 @@ class USDMDeFiService {
     // EtherAmount lastGasFee = blockInfo.baseFeePerGas!;
 
     try {
-      final transaction = Transaction.callContract(from: sender, contract: contract, function: contractFunction!, parameters: params, value: collateral);
+      final transaction = Transaction.callContract(from: sender, contract: contract,
+                                                    function: contractFunction!, parameters: params, value: collateral);
       return await web3Client.estimateGas(sender: sender, to: transaction.to, value: transaction.value, data: transaction.data);
     } on Exception catch (_) {
       throw Exception(_);

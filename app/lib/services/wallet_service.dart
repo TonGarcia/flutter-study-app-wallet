@@ -49,7 +49,7 @@ class WalletService implements WalletAddressService {
   late Web3Client _ethClient;
 
   WalletService() {
-    _ethClient = Web3Client(Config.rinkebyUrl, _httpClient);
+    _ethClient = Web3Client(Config.ethereumUrl, _httpClient);
   }
 
   @override

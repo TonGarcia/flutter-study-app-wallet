@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app/config.dart';
 import 'package:app/services/wallet_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web3dart/credentials.dart';
 
 class UserData {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -66,6 +67,10 @@ class UserData {
     walletPublicKey = publicKey.toString();
     publicAddress = publicKey.toString();
     setUserDefaults(walletPublicKey, walletPrivateKey, publicAddress, seedPhrase);
+  }
+
+  Credentials getCredentials() {
+    return walletService.getCredentials(walletPrivateKey);
   }
 
   Future<num> getBalance() async {
