@@ -18,6 +18,9 @@ class Config {
   static const String noSeedPhraseStr = 'No seed wallet yet';
 
   static EthereumAddress usdmAddress() {
+    // ???? 0xB526D34ba883F6FA79cB5bEa800CF71E1dEc660d
+    // v0.0.8 = 0x311F0e3D49A9577845DC155F2Ca5f891B90c5e64 (not validating)
+    // v0.0.5 = 0x9DBf67aF5d769862e4F2f8696529007F1b129ACc (working correctly)
     return EthereumAddress.fromHex('0x9DBf67aF5d769862e4F2f8696529007F1b129ACc');
   }
 

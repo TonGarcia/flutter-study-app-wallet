@@ -6,6 +6,12 @@ import 'package:http/http.dart';
 import 'package:app/config.dart';
 import 'package:web3dart/web3dart.dart';
 
+class USDMDeFiCollateral {
+  BigInt lockedCollateral, remainingCollateral, vaultDebt, liquidationPrice;
+  USDMDeFiCollateral(this.lockedCollateral, this.remainingCollateral,
+                      this.vaultDebt, this.liquidationPrice);
+}
+
 class USDMDeFiService {
 
   // Integration
@@ -48,7 +54,7 @@ class USDMDeFiService {
     getCollateralsEthOfFunction = contract.function('getCollateralsEthOf');
     getETHUSDFunction = contract.function('getETHUSD');
     estimateMaxMintableStable = contract.function('estimateMaxMintableStable');
-    collateralizeFunction = contract.function('collaterallize'); // TODO update it after update smart contract
+    collateralizeFunction = contract.function('collaterallize'); // collaterallize (v0.5), collateralize (+v0.7) 
   }
 
   void subscribeTransferEvent() {
@@ -73,6 +79,15 @@ class USDMDeFiService {
     return web3Client.call(
         contract: contract,
         function: balanceFunction,
+        params: [userWalletAddress]
+    );
+  }
+
+  Future<List> getPositions() {
+    final userWalletAddress = EthereumAddress.fromHex(_userWalletData.publicAddress);
+    return web3Client.call(
+        contract: contract,
+        function: getCollateralsEthOfFunction,
         params: [userWalletAddress]
     );
   }
@@ -157,5 +172,25 @@ class USDMDeFiService {
   double formatStable(BigInt amount) {
     return amount.toDouble() / 100;
   }
+
+  double parseBalance(List result) {
+    return formatStable(result[0]);
+  }
+
+  List<USDMDeFiCollateral> parseCollateral(List result) {
+    List<USDMDeFiCollateral> collaterals = [];
+    final resp = result[0];
+    for (var element in resp) {
+      final lockedCollateral = element[0];
+      final remainingCollateral = element[1];
+      final vaultDebt = element[2];
+      final liquidationPrice = element[3];
+      collaterals.add(USDMDeFiCollateral(lockedCollateral, remainingCollateral, vaultDebt, liquidationPrice));
+    }
+
+    return collaterals;
+  }
+
+
 
 }
